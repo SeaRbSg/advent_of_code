@@ -8,16 +8,27 @@
 (define dirs  '([N . E] [E . S] [S . W] [W . N]))
 (define rdirs '([E . N] [S . E] [W . S] [N . W]))
 
-(define-values (d x y)
-  (for/fold ([d 'N] [x 0] [y 0])
-            ([inst (string-split directions ", ")])
-    (match-let* ([(regexp #rx"(R|L)([0-9]+)"
-                          (list _ m (app string->number n))) inst]
-                 [nd (match m
-                       ["R" (cdr (assoc d dirs))]
-                       ["L" (cdr (assoc d rdirs))])]
-                 [nx (match nd ['N (+ x n)] ['E x]       ['S (- x n)] ['W x])]
-                 [ny (match nd ['N y]       ['E (+ y n)] ['S y]       ['W (- y n)])])
-      (values nd nx ny))))
+(define (convert directions)
+  (string-split directions ", "))
 
-(+ (abs x) (abs y))
+(define (distance-to directions)
+  (define-values (d x y)
+   (for/fold ([d 'N] [x 0] [y 0])
+             ([inst (convert directions)])
+     (match-let* ([(regexp #rx"(R|L)([0-9]+)"
+                           (list _ m (app string->number n))) inst]
+                  [nd (match m
+                        ["R" (cdr (assoc d dirs))]
+                        ["L" (cdr (assoc d rdirs))])]
+                  [nx (match nd ['N (+ x n)] ['E x]       ['S (- x n)] ['W x])]
+                  [ny (match nd ['N y]       ['E (+ y n)] ['S y]       ['W (- y n)])])
+       (values nd nx ny))))
+
+  (+ (abs x) (abs y)))
+
+(distance-to directions)
+
+(module+ test
+  (require rackunit)
+
+  (check-equal? (distance-to directions) 243))
