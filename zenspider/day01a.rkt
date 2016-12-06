@@ -8,8 +8,11 @@
 (define dirs  '([N . E] [E . S] [S . W] [W . N]))
 (define rdirs '([E . N] [S . E] [W . S] [N . W]))
 
-(define (convert directions)
+(define (split directions)
   (string-split directions ", "))
+
+(define (convert directions)
+  (split directions))
 
 (define (distance-to directions)
   (define-values (d x y)
@@ -30,5 +33,9 @@
 
 (module+ test
   (require rackunit)
+
+  (check-equal? (distance-to "R2, L3") 5)
+  (check-equal? (distance-to "R2, R2, R2") 2)
+  (check-equal? (distance-to "R5, L5, R5, R3") 12)
 
   (check-equal? (distance-to directions) 243))
