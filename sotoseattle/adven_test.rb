@@ -1,8 +1,7 @@
 require 'minitest/autorun'
 require 'minitest/pride'
 
-require_relative './day01a.rb'
-require_relative './day01b.rb'
+require_relative './day01.rb'
 
 class TestAdventus < Minitest::Test
   include Adventus
