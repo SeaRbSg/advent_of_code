@@ -1,8 +1,15 @@
 #lang racket
 
+(define-syntax (values/first stx)       ; returns first value given to it
+  (syntax-case stx ()
+    [(_ values-expr) #'(first (call-with-values (λ () values-expr) list))]))
+
+(define-syntax (for/fold/1 stx)         ; only returns first value of for/fold
+  (syntax-case stx ()
+    [(_ body ...) #'(values/first (for/fold body ...))]))
+
 (define (decode lines)
-  (define-values (acc _)
-    (for/fold ([acc 0]
+  (for/fold/1 ([acc 0]
                [pos 5])
               ([line (string-split lines)])
       (define n (for/fold ([pos pos])
@@ -13,7 +20,6 @@
                     [#\L (if (= 1 (modulo pos 3)) pos (- pos 1))]
                     [#\R (if (= 0 (modulo pos 3)) pos (+ pos 1))])))
       (values (+ (* 10 acc) n) n)))
-  acc)
 
 (decode (call-with-input-file "day02a.txt" port->string))
 
