@@ -3,5 +3,11 @@ task :sync do
   user = __FILE__.pathmap('%-1d')
   from = __FILE__.pathmap("%{SeaRbSg/advent_of_code/#{user},#{user}/advent_of_code/2016/}d")
   to = File.expand_path('..', __FILE__)
-  sh "rsync -av #{from} #{to} --exclude=input --exclude=ruby/.bundle --exclude=rust/target"
+  sh %W[ rsync -av #{from} #{to}
+         --exclude=input
+         --exclude=ruby/.bundle
+         --exclude=rust/target
+         --exclude=Rakefile
+         --delete
+       ].join(' ')
 end
