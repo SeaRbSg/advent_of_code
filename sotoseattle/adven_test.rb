@@ -58,10 +58,13 @@ class TestAdventus < Minitest::Test
    end
 
   def test_day02
-    assert_equal "1985",  bathroom_code_square("ULL\nRRDDD\nLURDL\nUUUUD")
-    assert_equal "78985", bathroom_code_square(File.read("./test_files/input_day2.txt"))
-    assert_equal "5DB3",  bathroom_code_diamond("ULL\nRRDDD\nLURDL\nUUUUD")
-    assert_equal "57DD8", bathroom_code_diamond(File.read("./test_files/input_day2.txt"))
+    long_input = File.read("./test_files/input_day2.txt")
+
+    assert_equal "1985",  Square_Keypad.new.decypher("ULL\nRRDDD\nLURDL\nUUUUD")
+    assert_equal "78985", Square_Keypad.new.decypher(long_input)
+
+    assert_equal "5DB3",  Diamond_Keypad.new.decypher("ULL\nRRDDD\nLURDL\nUUUUD")
+    assert_equal "57DD8", Diamond_Keypad.new.decypher(long_input)
   end
 
 end
