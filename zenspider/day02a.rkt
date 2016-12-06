@@ -26,19 +26,19 @@
 (define (d c) (vector-ref c 2))
 (define (l c) (vector-ref c 3))
 (define (r c) (vector-ref c 4))
-(define (wire-ud l a b) (vector-set! a 2 b) (vector-set! b 1 a))
-(define (wire-lr l a b) (vector-set! a 4 b) (vector-set! b 3 a))
+(define (wire-ud a b) (vector-set! a 2 b) (vector-set! b 1 a))
+(define (wire-lr a b) (vector-set! a 4 b) (vector-set! b 3 a))
 
 (define pad (build-list 9 (lambda (n) (cell (add1 n)))))
 (define start (list-ref pad (sub1 5)))
 
 (for ([row (in-slice 3 pad)])
   (for/list ([pair (in-subs 2 row)])
-    (apply wire-lr pad pair)))
+    (apply wire-lr pair)))
 
 (for ([col (transpose (in-slice 3 pad))])
   (for/list ([pair (in-subs 2 col)])
-    (apply wire-ud pad pair)))
+    (apply wire-ud pair)))
 
 (define-syntax (values/first stx)       ; returns first value given to it
   (syntax-case stx ()
