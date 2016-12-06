@@ -1,6 +1,8 @@
 #lang racket/base
 
 (require (for-syntax racket/base)
+         racket/bool
+         racket/format
          racket/list
          racket/match
          racket/port
@@ -29,16 +31,28 @@
 (define (wire-ud a b) (vector-set! a 2 b) (vector-set! b 1 a))
 (define (wire-lr a b) (vector-set! a 4 b) (vector-set! b 3 a))
 
-(define pad (build-list 9 (lambda (n) (cell (add1 n)))))
-(define start (list-ref pad (sub1 5)))
+(define (ascii->pad ascii)
+  (define pad
+    (for/list ([row ascii])
+      (for/list ([n (in-list row)])
+        (if (equal? '_ n) #f (cell n)))))
 
-(for ([row (in-slice 3 pad)])
-  (for/list ([pair (in-subs 2 row)])
-    (apply wire-lr pair)))
+  (for ([row pad])
+    (for ([pair (in-subs 2 (filter-not false? row))])
+      (apply wire-lr pair)))
 
-(for ([col (transpose (in-slice 3 pad))])
-  (for/list ([pair (in-subs 2 col)])
-    (apply wire-ud pair)))
+  (for ([col (transpose pad)])
+    (for ([pair (in-subs 2 (filter-not false? col))])
+      (apply wire-ud pair)))
+
+  (filter-not false? (flatten pad)))
+
+(define ascii '((1 2 3)
+                (4 5 6)
+                (7 8 9)))
+
+(define pad (ascii->pad ascii))
+(define start (list-ref (flatten pad) (sub1 5)))
 
 (define-syntax (values/first stx)       ; returns first value given to it
   (syntax-case stx ()
