@@ -33,10 +33,10 @@ class TestAdventus < Minitest::Test
   def test_day03
     long_input = File.read("./test_files/input_day3.txt")
 
-    assert_equal 0, valid_triangles_by_row("  25  5  10 \n  5  25  10 \n  10  25  5 ")
+    assert_equal 0, triangles_in_rows("  25  5  10 \n  5  25  10 \n  10  25  5 ")
 
-    assert_equal 993,  valid_triangles_by_row(long_input)
-    assert_equal 1849, valid_triangles_by_col(long_input)
+    assert_equal 993,  triangles_in_rows(long_input)
+    assert_equal 1849, triangles_in_cols(long_input)
   end
 
 end
