@@ -16,7 +16,11 @@ module Adventus
                 spot = spot.zip(jump).map{|e| e.reduce(:+)}
     end
 
-    spot.map(&:abs).reduce(:+)
+    distance spot
+  end
+
+  def distance arr
+    arr.map(&:abs).reduce(:+)
   end
 
 end
