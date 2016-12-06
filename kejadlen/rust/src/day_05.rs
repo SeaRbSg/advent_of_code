@@ -1,4 +1,5 @@
 use std::char;
+use std::collections::HashMap;
 
 use crypto::digest::Digest;
 use crypto::md5::Md5;
@@ -6,11 +7,17 @@ use crypto::md5::Md5;
 use errors::*;
 
 pub fn solve(input: &str) -> Result<String> {
-  let pw = Password::new(input.trim());
-  let mut solution: [Option<char>; 8] = [None, None, None, None, None, None, None, None];
-  while solution.iter().any(Option::is_none) {
+  let mut pw = Password::new(input.trim());
+  let mut solution = HashMap::new();
+  while solution.len() < 8 {
+    let candidate = pw.next().unwrap();
+    if candidate.0 < 8 {
+      solution.entry(candidate.0).or_insert(candidate.1);
+    }
   }
-  solution.iter().map(|&x| x).collect::<Option<String>>().ok_or("".into())
+  let mut v = solution.iter().collect::<Vec<_>>();
+  v.sort();
+  Ok(v.iter().map(|x| *x.1).collect::<String>())
 }
 
 struct Password {
@@ -26,10 +33,8 @@ impl Password {
 }
 
 impl Iterator for Password {
-  // we will be counting with usize
   type Item = (usize, char);
 
-  // next() is the only required method
   fn next(&mut self) -> Option<(usize, char)> {
     let mut result = None;
     let mut hash = [0; 16];
