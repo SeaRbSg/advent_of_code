@@ -1,8 +1,9 @@
 #lang racket/base
 
-(require racket/match
-         racket/list
-         racket/string)
+(require racket/list
+         racket/match
+         racket/string
+         "myutils.rkt")
 
 (define directions "R3, L5, R2, L1, L2, R5, L2, R2, L2, L2, L1, R2, L2, R4, R4, R1, L2, L3, R3, L1, R2, L2, L4, R4, R5, L3, R3, L3, L3, R4, R5, L3, R3, L5, L1, L2, R2, L1, R3, R1, L1, R187, L1, R2, R47, L5, L1, L2, R4, R3, L3, R3, R4, R1, R3, L1, L4, L1, R2, L1, R4, R5, L1, R77, L5, L4, R3, L2, R4, R5, R5, L2, L2, R2, R5, L2, R194, R5, L2, R4, L5, L4, L2, R5, L3, L2, L5, R5, R2, L3, R3, R1, L4, R2, L1, R5, L1, R5, L1, L1, R3, L1, R5, R2, R5, R5, L4, L5, L5, L5, R3, L2, L5, L4, R3, R1, R1, R4, L2, L4, R5, R5, R4, L2, L2, R5, R5, L5, L2, R4, R4, L4, R1, L3, R1, L1, L1, L1, L4, R5, R4, L4, L4, R5, R3, L2, L2, R3, R1, R4, L3, R1, L4, R3, L3, L2, R2, R2, R2, L1, L4, R3, R2, R2, L3, R2, L3, L2, R4, L2, R3, L4, R5, R4, R1, R5, R3")
 
@@ -13,13 +14,9 @@
   (string-split directions ", "))
 
 (define (convert directions)
-  (define (flatmap f lst) (apply append (map f lst)))
-  (flatmap (lambda (inst)
-             (match-define
-               (regexp #rx"(R|L)([0-9]+)" (list _ m (app string->number n)))
-               inst)
-             (cons m (build-list n (lambda (_) "F"))) )
-           (split directions)))
+  (for/list/flat ([inst (split directions)])
+    (define-regexp (m (app string->number n)) #rx"(R|L)([0-9]+)" inst)
+    (cons m (build-list n (lambda (_) "F")))))
 
 (define (distance-to directions)
   (define-values (d x y c)

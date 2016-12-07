@@ -29,6 +29,9 @@
              (lambda (xs) (pair? (drop xs (sub1 n))))
              #f #f))))
 
+(define (flatmap f lst)
+  (apply append (map f lst)))
+
 (define (groups-of n l)
   (sequence->list (in-slice 3 (flatten l))))
 

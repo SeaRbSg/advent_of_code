@@ -1,14 +1,14 @@
 #lang racket/base
 
 (require racket/file
-         racket/list)
+         racket/list
+         "myutils.rkt")
 
-(define (my-transpose m) (apply map list m))
 (define alphabet (string->list "abcdefghijklmnopqrstuvwxyz"))
 
 (define (noise lines)
   (list->string
-   (for/list ([col (my-transpose (map string->list lines))])
+   (for/list ([col (transpose (map string->list lines))])
      (argmax (lambda (c) (count (lambda (y) (equal? c y)) col)) alphabet))))
 
 (noise (file->lines "day06a.txt"))
