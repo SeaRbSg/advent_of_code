@@ -2,19 +2,24 @@
 
 (require (for-syntax racket/base)
          racket/list
+         racket/match
          racket/port
          racket/sequence
          racket/string)
 
 (provide (all-defined-out))
 
-(define-syntax (values/first stx)       ; returns first value given to it
-  (syntax-case stx ()
-    [(_ values-expr) #'(first (call-with-values (λ () values-expr) list))]))
+(define-syntax-rule (values/first values-expr)
+  (first (call-with-values (lambda () values-expr) list)))
 
-(define-syntax (for/fold/1 stx)         ; only returns first value of for/fold
-  (syntax-case stx ()
-    [(_ body ...) #'(values/first (for/fold body ...))]))
+(define-syntax-rule (for/fold/1 body ...) ; only returns first value of for/fold
+  (values/first (for/fold body ...)))
+
+(define-syntax-rule (for/list/flat body ...)
+  (flatten (for/list body ...)))
+
+(define-syntax-rule (define-regexp (pat ...) re str)
+  (match-define (regexp re (list _ pat ...)) str))
 
 (define (in-subs n l)                   ; like ruby's each_cons(n)
   (make-do-sequence
