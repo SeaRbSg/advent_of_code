@@ -1,22 +1,12 @@
 #lang racket/base
 
-(require (for-syntax racket/base)
-         racket/bool
+(require racket/bool
          racket/format
          racket/list
          racket/match
          racket/port
-         racket/sequence
-         racket/string)
-
-(define (transpose m) (apply map list (sequence->list m)))
-(define (in-subs n l)                   ; like ruby's each_cons(n)
-  (make-do-sequence
-   (lambda ()
-     (values (lambda (xs) (take xs n))
-             cdr l
-             (lambda (xs) (pair? (drop xs (sub1 n))))
-             #f #f))))
+         racket/string
+         "myutils.rkt")
 
 (define (cell n)                        ; builds '#(n u d l r), points to self
   (define v (make-vector 5))
@@ -56,14 +46,6 @@
 (define pad (ascii->pad ascii))
 (define start (list-ref (flatten pad) (sub1 5)))
 
-(define-syntax (values/first stx)       ; returns first value given to it
-  (syntax-case stx ()
-    [(_ values-expr) #'(first (call-with-values (λ () values-expr) list))]))
-
-(define-syntax (for/fold/1 stx)         ; only returns first value of for/fold
-  (syntax-case stx ()
-    [(_ body ...) #'(values/first (for/fold body ...))]))
-
 (define (decode start lines)
   (for/fold/1 ([acc ""]
                [pos start])
@@ -77,11 +59,13 @@
                   [#\R (r pos)])))
     (values (string-append acc (~s (v c))) c)))
 
-(decode start (call-with-input-file "day02a.txt" port->string))
+(define s (port->string (open-input-file "day02a.txt")))
+(decode start s)
 
 (module+ test
   (require rackunit)
 
   (check-equal? (decode start "ULL\nRRDDD\nLURDL\nUUUUD") "5DB3")
+  (check-equal? (decode start s) "46C92")
 
   (printf "done~n"))

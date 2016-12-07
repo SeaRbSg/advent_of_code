@@ -1,11 +1,28 @@
 #lang racket/base
 
-(require racket/list
+(require (for-syntax racket/base)
+         racket/list
          racket/port
          racket/sequence
          racket/string)
 
 (provide (all-defined-out))
+
+(define-syntax (values/first stx)       ; returns first value given to it
+  (syntax-case stx ()
+    [(_ values-expr) #'(first (call-with-values (λ () values-expr) list))]))
+
+(define-syntax (for/fold/1 stx)         ; only returns first value of for/fold
+  (syntax-case stx ()
+    [(_ body ...) #'(values/first (for/fold body ...))]))
+
+(define (in-subs n l)                   ; like ruby's each_cons(n)
+  (make-do-sequence
+   (lambda ()
+     (values (lambda (xs) (take xs n))
+             cdr l
+             (lambda (xs) (pair? (drop xs (sub1 n))))
+             #f #f))))
 
 (define (groups-of n l)
   (sequence->list (in-slice 3 (flatten l))))
