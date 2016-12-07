@@ -4,6 +4,7 @@ require 'minitest/pride'
 require_relative './day01.rb'
 require_relative './day02.rb'
 require_relative './day03.rb'
+require_relative './day04.rb'
 
 class TestAdventus < Minitest::Test
   include Adventus
@@ -37,6 +38,17 @@ class TestAdventus < Minitest::Test
 
     assert_equal 993,  triangles_in_rows(long_input)
     assert_equal 1849, triangles_in_cols(long_input)
+  end
+
+  def test_day04
+    long_input = File.read("./test_files/input_day4.txt")
+
+    assert_equal 123, sector_id("aaaaa-bbb-z-y-x-123[abxyz]")
+    assert_equal 987, sector_id("a-b-c-d-e-f-g-h-987[abcde]")
+    assert_equal 404, sector_id("not-a-real-room-404[oarel]")
+    assert_equal 0, sector_id("totally-real-room-200[decoy]")
+
+    assert_equal 409147, sector_ID_sum(long_input)
   end
 
 end
