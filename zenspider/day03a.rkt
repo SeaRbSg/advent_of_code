@@ -1,14 +1,15 @@
 #lang racket
 
+(require racket/match
+         "myutils.rkt")
+
 (define (triangle? l)
   (match-define (list a b c) (sort l <))
 
   (> (+ a b) c))
 
-(for/sum ([line (file->lines "day03a.txt")])
-  (if (triangle? (map string->number (string-split line)))
-      1
-      0))
+(for/sum ([l (parse-lines-of-numbers (open-input-file "day03a.txt"))])
+  (if (triangle? l) 1 0))
 
 (module+ test
   (require rackunit)
