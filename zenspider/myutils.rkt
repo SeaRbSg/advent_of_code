@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require (for-syntax racket/base)
+         racket/function
          racket/list
          racket/match
          racket/port
@@ -8,6 +9,9 @@
          racket/string)
 
 (provide (all-defined-out))
+
+(define-syntax-rule (define-list (pat ...) expr)
+  (match-define (list pat ...) expr))
 
 (define-syntax-rule (values/first values-expr)
   (first (call-with-values (lambda () values-expr) list)))
@@ -32,8 +36,15 @@
 (define (flatmap f lst)
   (apply append (map f lst)))
 
+(define (group-by-map f l)              ; more like ruby's group_by
+  (map (lambda (xs) (cons (f (first xs)) xs)) (group-by f l)))
+
 (define (groups-of n l)
   (sequence->list (in-slice 3 (flatten l))))
+
+(define (occur l)
+  (sort (group-by-map length (group-by identity l))
+        (lambda (a b) (< (first b) (first a)))))
 
 (define (parse-lines-of-numbers in)
   (for/list ([line (port->lines in)])
