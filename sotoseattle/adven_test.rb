@@ -43,12 +43,14 @@ class TestAdventus < Minitest::Test
   def test_day04
     long_input = File.read("./test_files/input_day4.txt")
 
-    assert_equal 123, sector_id("aaaaa-bbb-z-y-x-123[abxyz]")
-    assert_equal 987, sector_id("a-b-c-d-e-f-g-h-987[abcde]")
-    assert_equal 404, sector_id("not-a-real-room-404[oarel]")
-    assert_equal 0, sector_id("totally-real-room-200[decoy]")
+    assert_equal ["ttttt uuu s r q", 123], decrypt("aaaaa-bbb-z-y-x-123[abxyz]")
+    assert_equal ["z a b c d e f g", 987], decrypt("a-b-c-d-e-f-g-h-987[abcde]")
+    assert_equal ["bch o fsoz fcca", 404], decrypt("not-a-real-room-404[oarel]")
+    assert_equal ["", 0], decrypt("totally-real-room-200[decoy]")
+    assert_equal 409147, sum_of_all_valid_room_id(long_input)
 
-    assert_equal 409147, sector_ID_sum(long_input)
+    assert_equal "v", decypher_char("q", 343)
+    assert_equal 991, find_keyword_room(long_input)
   end
 
 end
