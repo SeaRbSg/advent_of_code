@@ -5,6 +5,7 @@ require_relative './day01.rb'
 require_relative './day02.rb'
 require_relative './day03.rb'
 require_relative './day04.rb'
+require_relative './day05.rb'
 
 class TestAdventus < Minitest::Test
   include Adventus
@@ -53,4 +54,11 @@ class TestAdventus < Minitest::Test
     assert_equal 991, find_keyword_room(long_input)
   end
 
+  def test_day05
+    assert_equal "18f47a30",  hashit_out("abc")
+    assert_equal "c6697b55",  hashit_out("ffykfhsq")
+
+    assert_equal "05ace8e3",  hashit_better("abc")
+    assert_equal "8c35d1ab",  hashit_better("ffykfhsq") #6c35d1ab
+  end
 end
