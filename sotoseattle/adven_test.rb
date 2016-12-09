@@ -7,6 +7,7 @@ require_relative './day03.rb'
 require_relative './day04.rb'
 require_relative './day05.rb'
 require_relative './day06.rb'
+require_relative './day07.rb'
 
 class TestAdventus < Minitest::Test
   include Adventus
@@ -75,5 +76,18 @@ class TestAdventus < Minitest::Test
 
     assert_equal "qtbjqiuq", decode_by_repetition(long_input)
     assert_equal "akothqli", decode_by_least_common(long_input)
+
+  end
+
+  def test_day07
+    long_input = File.read("./test_files/input_day7.txt")
+
+    assert supports_TLS?("abba[mnop]qrst[ururur]ksdhksd")
+    assert supports_TLS?("abba[mnop]qrst")
+    refute supports_TLS?("abcd[bddb]xyyx")
+    refute supports_TLS?("aaaa[qwer]tyui")
+    assert supports_TLS?("ioxxoj[asdfgh]zxcvbn")
+
+    assert_equal 118, n_TLS_valid(long_input)
   end
 end
