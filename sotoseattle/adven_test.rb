@@ -82,12 +82,14 @@ class TestAdventus < Minitest::Test
   def test_day07
     long_input = File.read("./test_files/input_day7.txt")
 
-    assert supports_TLS?("abba[mnop]qrst[ururur]ksdhksd")
-    assert supports_TLS?("abba[mnop]qrst")
-    refute supports_TLS?("abcd[bddb]xyyx")
-    refute supports_TLS?("aaaa[qwer]tyui")
-    assert supports_TLS?("ioxxoj[asdfgh]zxcvbn")
+    # assert supports_TLS?("abba[mnop]qrst[ururur]ksdhksd")
+    # assert supports_TLS?("abba[mnop]qrst")
+    # refute supports_TLS?("abcd[bddb]xyyx")
+    # refute supports_TLS?("aaaa[qwer]tyui")
+    # assert supports_TLS?("ioxxoj[asdfgh]zxcvbn")
+    #
+    # assert_equal 118, n_TLS_valid(long_input)
 
-    assert_equal 118, n_TLS_valid(long_input)
+    assert supports_SSL?("aba[bab]xyz")
   end
 end
