@@ -6,6 +6,7 @@ require_relative './day02.rb'
 require_relative './day03.rb'
 require_relative './day04.rb'
 require_relative './day05.rb'
+require_relative './day06.rb'
 
 class TestAdventus < Minitest::Test
   include Adventus
@@ -55,10 +56,24 @@ class TestAdventus < Minitest::Test
   end
 
   def test_day05
+    skip # Too slow
     assert_equal "18f47a30",  hashit_out("abc")
     assert_equal "c6697b55",  hashit_out("ffykfhsq")
 
     assert_equal "05ace8e3",  hashit_better("abc")
     assert_equal "8c35d1ab",  hashit_better("ffykfhsq") #6c35d1ab
+  end
+
+  def test_day06
+    short_input = "eedadn\ndrvtee\neandsr\nraavrd\natevrs\ntsrnev\nsdttsa\n
+                   rasrtv\nnssdts\nntnada\nsvetve\ntesnvt\nvntsnd\nvrdear\n
+                   dvrsen\nenarar"
+    long_input = File.read("./test_files/input_day6.txt")
+
+    assert_equal "easter", decode_by_repetition(short_input)
+    assert_equal "advent", decode_by_least_common(short_input)
+
+    assert_equal "qtbjqiuq", decode_by_repetition(long_input)
+    assert_equal "akothqli", decode_by_least_common(long_input)
   end
 end
