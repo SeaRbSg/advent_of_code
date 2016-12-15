@@ -1,0 +1,3 @@
+cpy 1 a
+cpy 2 b
+cpy a b
