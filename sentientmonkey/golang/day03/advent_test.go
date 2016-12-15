@@ -17,14 +17,38 @@ func TestTriangleImpossible(t *testing.T) {
 	assert.False(t, triangle.Possible())
 }
 
+func TestTriangleImpossibleUnordered(t *testing.T) {
+	triangle := Triangle{10, 4, 25}
+	assert.False(t, triangle.Possible())
+}
+
 func TestTriangleImpossibleAgain(t *testing.T) {
 	triangle := Triangle{1, 2, 3}
 	assert.False(t, triangle.Possible())
 }
 
 func TestTrianglePossibleCounts(t *testing.T) {
-	input := strings.NewReader(" 5  10  14\n  5  10  15 \n 1 2 3\n")
+	testCounts := `5  10  14
+ 5  10  15
+ 1   2   3
+`
+
+	input := strings.NewReader(testCounts)
 	count := TriangleCounts(input)
 
 	assert.Equal(t, 1, count)
+}
+
+func TestTriangleVerticalPossibleCounts(t *testing.T) {
+	testVerticalCounts := `101 301 501
+102 302 502
+103 303 503
+201 401 601
+202 402 602
+203 403 603
+`
+	input := strings.NewReader(testVerticalCounts)
+	count := TriangleVerticalCounts(input)
+
+	assert.Equal(t, 6, count)
 }
