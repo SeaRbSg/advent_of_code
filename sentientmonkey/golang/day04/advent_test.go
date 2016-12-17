@@ -53,3 +53,18 @@ func TestSectorCounts(t *testing.T) {
 	r := strings.NewReader(testRooms)
 	assert.Equal(t, 1514, SectorSum(r))
 }
+
+func TestShiftRune(t *testing.T) {
+	assert.Equal(t, 'b', shiftRune('a', 1))
+	assert.Equal(t, 'c', shiftRune('a', 2))
+	assert.Equal(t, 'v', shiftRune('q', 343))
+}
+
+func TestShiftWord(t *testing.T) {
+	assert.Equal(t, "very", shiftWord("qzmt", 343))
+}
+
+func TestDecryptRoom(t *testing.T) {
+	r, _ := NewRoom("qzmt-zixmtkozy-ivhz-343[zimth]")
+	assert.Equal(t, "very encrypted name", r.Decrypt())
+}

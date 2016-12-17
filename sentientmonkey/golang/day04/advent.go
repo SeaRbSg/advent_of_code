@@ -100,6 +100,54 @@ func (room *Room) IsValid() bool {
 	return room.calculateChecksum() == room.Checksum
 }
 
+func (room *Room) Decrypt() string {
+	var results []string
+	for _, word := range strings.Split(room.Name, "-") {
+		results = append(results, shiftWord(word, room.Sector))
+	}
+
+	return strings.Join(results, " ")
+}
+
+func shiftRune(r rune, shift int) rune {
+	s := int(r) + shift%26
+
+	if s > 'z' {
+		return rune(s - 26)
+	} else if s < 'a' {
+		return rune(s + 26)
+	}
+
+	return rune(s)
+}
+
+func shiftWord(s string, shift int) string {
+	result := ""
+	for _, c := range s {
+		result += string(shiftRune(c, shift))
+	}
+
+	return result
+}
+
+func DecryptWords(reader io.Reader) {
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		var s string
+		_, err := fmt.Sscanf(scanner.Text(), "%s\n", &s)
+		if err != nil {
+			continue
+		}
+		room, err := NewRoom(s)
+		if err != nil {
+			continue
+		}
+		if room.IsValid() {
+			fmt.Printf("%s: %d\n", room.Decrypt(), room.Sector)
+		}
+	}
+}
+
 func SectorSum(reader io.Reader) int {
 	count := 0
 	scanner := bufio.NewScanner(reader)
@@ -121,5 +169,5 @@ func SectorSum(reader io.Reader) int {
 }
 
 func main() {
-	fmt.Println(SectorSum(os.Stdin))
+	DecryptWords(os.Stdin)
 }
