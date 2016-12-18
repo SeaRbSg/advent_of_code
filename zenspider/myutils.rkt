@@ -22,6 +22,9 @@
 (define-syntax-rule (for/list/flat body ...)
   (flatten (for/list body ...)))
 
+(define-syntax-rule (for/all  body ...) (for/and body ...))
+(define-syntax-rule (for/none body ...) (not (for/or body ...)))
+
 (define-syntax-rule (define-regexp (pat ...) re str)
   (match-define (regexp re (list _ pat ...)) str))
 
