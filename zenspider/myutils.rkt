@@ -36,6 +36,10 @@
              (lambda (xs) (pair? (drop xs (sub1 n))))
              #f #f))))
 
+(define (count-lines in f)
+  (for/sum ([line (parse-lines in)])
+    (if (f line) 1 0)))
+
 (define (flatmap f lst)
   (apply append (map f lst)))
 
@@ -49,8 +53,11 @@
   (sort (group-by-map length (group-by identity l))
         (lambda (a b) (< (first b) (first a)))))
 
+(define (parse-lines in)
+  (port->lines (if (input-port? in) in (open-input-file in))))
+
 (define (parse-lines-of-numbers in)
-  (for/list ([line (port->lines in)])
+  (for/list ([line (parse-lines in)])
     (map string->number (string-split line))))
 
 (define (rotate lls)
