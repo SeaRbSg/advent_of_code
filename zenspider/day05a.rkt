@@ -8,7 +8,8 @@
   (and (zero? (bytes-ref x 0))
        (zero? (bytes-ref x 1))
        (zero? (bitwise-and #xF0 (bytes-ref x 2)))
-       (bytes->hex-string x)))
+       (let ([hex (bytes->hex-string x)])
+         (substring hex 5 6))))
 
 (define (unlock key len [start 0])
   (string-append*
@@ -17,13 +18,13 @@
               ([i (in-naturals start)]
                #:break (>= (length l) len)
                #:when (md5hash key i))
-      (cons (substring (md5hash key i) 5 6) l)))))
+      (cons (md5hash key i) l)))))
 
 (module+ test
   (require rackunit)
 
   (check-equal? (md5hash "abc" 3231928) #f)
-  (check-equal? (md5hash "abc" 3231929) "00000155f8105dff7f56ee10fa9b9abd")
+  (check-equal? (md5hash "abc" 3231929) "1")
 
   (check-equal? (unlock "abc" 0) "")
   (check-equal? (unlock "abc" 1 3231928) "1")
