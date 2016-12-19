@@ -43,7 +43,8 @@
 
 (define (data-file n)
   (build-path (find-system-path 'orig-dir)
-              (string-append "day" (~0n n 2) "a.txt")))
+              "input"
+              (string-append (~0n n 2) ".txt")))
 
 (define (flatmap f lst)
   (apply append (map f lst)))
