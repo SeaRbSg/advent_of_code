@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require (for-syntax racket/base)
+         racket/format
          racket/function
          racket/list
          racket/match
@@ -40,6 +41,10 @@
   (for/sum ([line (parse-lines in)])
     (if (f line) 1 0)))
 
+(define (data-file n)
+  (build-path (find-system-path 'orig-dir)
+              (string-append "day" (~0n n 2) "a.txt")))
+
 (define (flatmap f lst)
   (apply append (map f lst)))
 
@@ -67,3 +72,9 @@
   (groups-of 3 (transpose lls)))
 
 (define (transpose m) (apply map list (sequence->list m)))
+
+(define (~0n n [w 1])
+  (~n n w "0"))
+
+(define (~n n [w 1] [p " "])
+  (~a n #:align 'right #:min-width w #:pad-string p))

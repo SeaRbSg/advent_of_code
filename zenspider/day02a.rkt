@@ -3,7 +3,6 @@
 (require racket/bool
          racket/list
          racket/match
-         racket/port
          racket/string
          "myutils.rkt")
 
@@ -56,7 +55,7 @@
                   [#\R (r pos)])))
     (values (+ (* 10 acc) (v c)) c)))
 
-(define s (port->string (open-input-file "day02a.txt")))
+(define s (parse-lines (data-file 2)))
 (decode start s)
 
 (module+ test

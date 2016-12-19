@@ -8,8 +8,9 @@
 
   (> (+ a b) c))
 
-(for/sum ([l (parse-lines-of-numbers (open-input-file "day03a.txt"))])
-  (if (triangle? l) 1 0))
+(module+ main
+  (for/sum ([l (parse-lines-of-numbers (data-file 3))])
+    (if (triangle? l) 1 0)))
 
 (module+ test
   (require rackunit)

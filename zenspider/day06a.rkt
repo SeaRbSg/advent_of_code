@@ -11,7 +11,8 @@
    (for/list ([col (transpose (map string->list lines))])
      (argmax (lambda (c) (count (lambda (y) (equal? c y)) col)) alphabet))))
 
-(noise (file->lines "day06a.txt"))
+(module+ main
+  (noise (parse-lines (data-file 6))))
 
 (module+ test
   (require rackunit

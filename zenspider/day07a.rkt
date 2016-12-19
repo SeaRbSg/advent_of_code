@@ -28,4 +28,4 @@
   (displayln "done"))
 
 (module+ main
-  (count-lines "day07a.txt" tls?))
+  (count-lines (data-file 7) tls?))

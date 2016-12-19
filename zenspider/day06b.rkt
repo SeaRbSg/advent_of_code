@@ -12,7 +12,8 @@
      (argmin (lambda (c) (let ([x (count (lambda (y) (equal? c y)) col)])
                            (if (zero? x) 9999 x))) alphabet))))
 
-(noise (file->lines "day06a.txt"))
+(module+ main
+  (noise (parse-lines (data-file 6))))
 
 (module+ test
   (require rackunit
