@@ -61,5 +61,4 @@
   (check-equal? (sum-of-rooms rooms) 1514)
 
   (check-equal? (sum-of-rooms (parse-lines (data-file 4))) 158835)
-
-  (displayln "done"))
+  )

@@ -24,8 +24,7 @@
 
   (check-equal? (tls? "abba[mnop]qrst[bbbb]abcd") #t)
   (check-equal? (tls? "abba[mnop]qrst[abba]abcd") #f)
-
-  (displayln "done"))
+  )
 
 (module+ main
   (count-lines (data-file 7) tls?))

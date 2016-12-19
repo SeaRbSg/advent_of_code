@@ -88,5 +88,4 @@
   (check-equal? (assoc "northpole object storage"
                        (decode-valid-rooms (parse-lines (data-file 4))))
                 '("northpole object storage" 993))
-
-  (displayln "done"))
+  )

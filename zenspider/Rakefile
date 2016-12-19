@@ -1,0 +1,26 @@
+task :default => :test
+
+def files
+  n = ENV["N"]
+  f = (n && "day%02d*.rkt" % n.to_i) || ENV["F"] || "day*.rkt"
+end
+
+task :test do
+  sh "time raco test --direct #{files}"
+end
+
+task :slow do
+  sh "time raco test #{files}"
+end
+
+task :run do
+  sh "time raco test #{files}"
+end
+
+task :cov do
+  sh "raco cover #{files}"
+end
+
+task :clean do
+  rm_f Dir["*~"]
+end

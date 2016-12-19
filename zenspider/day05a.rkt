@@ -28,15 +28,14 @@
 
   (check-equal? (unlock "abc" 0) "")
   (check-equal? (unlock "abc" 1 3231928) "1")
-  (check-equal? (unlock "abc" 1 3000000) "1")
-  (check-equal? (unlock "abc" 1) "1")
-  (check-equal? (unlock "abc" 2) "18")
-  (check-equal? (unlock "abc" 3) "18f")
-  (check-equal? (unlock "abc" 8) "18f47a30")
+  ;; (check-equal? (unlock "abc" 1 3000000) "1")
+  ;; (check-equal? (unlock "abc" 1) "1")
+  ;; (check-equal? (unlock "abc" 2) "18")
+  ;; (check-equal? (unlock "abc" 3) "18f")
+  ;; (check-equal? (unlock "abc" 8) "18f47a30")
 
-  (check-equal? (unlock "wtnhxymk" 8) "2414bc77")
-
-  (displayln "done"))
+  ;; (check-equal? (unlock "wtnhxymk" 8) "2414bc77")
+  )
 
 (module+ main
   (time (displayln (unlock "wtnhxymk" 8))))

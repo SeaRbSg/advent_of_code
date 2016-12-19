@@ -23,14 +23,12 @@
            [pos (car xy)]
            [val (cdr xy)])
       (when (eq? #\nul (string-ref str pos))
-        (printf "i=~a xy=~a~n" i xy)
         (string-set! str pos (string-ref val 0)))))
   str)
 
-(time (unlock "wtnhxymk" 1 27712455))
-(newline)
-(newline)
-(time (unlock "wtnhxymk" 8))
+(module+ main
+  (time (unlock "wtnhxymk" 1 27712455))
+  (time (unlock "wtnhxymk" 8)))
 
 (module+ test
   (require rackunit)
@@ -40,10 +38,9 @@
   (check-equal? (md5hash "abc" 5017308) #f)
 
   (check-equal? (unlock "abc" 0) "")
-  (check-equal? (unlock "abc" 1 8605827) "0")
-  (check-equal? (unlock "abc" 2 3231928) "05")  ; 28118ms
-  (check-equal? (unlock "abc" 3 3231928) "05a") ; 55896ms
+  ;; (check-equal? (unlock "abc" 1 8605827) "0")
+  ;; (check-equal? (unlock "abc" 2 3231928) "05")  ; 28118ms
+  ;; (check-equal? (unlock "abc" 3 3231928) "05a") ; 55896ms
 
-  (check-equal? (unlock "wtnhxymk" 8 2231253) "437e60fc") ; 144708ms
-
-  (displayln "done"))
+  ;; (check-equal? (unlock "wtnhxymk" 8 2231253) "437e60fc") ; 144708ms
+  )

@@ -21,5 +21,4 @@
   (define s (string-split "eedadn\ndrvtee\neandsr\nraavrd\natevrs\ntsrnev\nsdttsa\nrasrtv\nnssdts\nntnada\nsvetve\ntesnvt\nvntsnd\nvrdear\ndvrsen\nenarar"))
 
   (check-equal? (noise s) "easter")
-  (printf "done~n")
   )

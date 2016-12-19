@@ -29,7 +29,8 @@
 
   (+ (abs x) (abs y)))
 
-(distance-to directions)
+(module+ main
+  (distance-to directions))
 
 (module+ test
   (require rackunit)
@@ -38,4 +39,5 @@
   (check-equal? (distance-to "R2, R2, R2") 2)
   (check-equal? (distance-to "R5, L5, R5, R3") 12)
 
-  (check-equal? (distance-to directions) 243))
+  (check-equal? (distance-to directions) 243)
+  )

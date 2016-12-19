@@ -55,13 +55,13 @@
                   [#\R (r pos)])))
     (values (+ (* 10 acc) (v c)) c)))
 
-(define s (parse-lines (data-file 2)))
-(decode start s)
+(module+ main
+  (decode start (parse-file (data-file 2))))
 
 (module+ test
   (require rackunit)
 
   (check-equal? (decode start "ULL\nRRDDD\nLURDL\nUUUUD") 1985)
-  (check-equal? (decode start s) 38961)
 
-  (printf "done~n"))
+  (check-equal? (decode start (parse-file (data-file 2))) 38961)
+  )

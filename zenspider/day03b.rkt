@@ -17,5 +17,4 @@
   (check-equal? (triangle? '(3 4 5)) #t)
   (check-equal? (triangle? '(5 10 25)) #f)
   (check-equal? (triangle? '(10 5 25)) #f)
-
-  (displayln "done"))
+  )

@@ -58,13 +58,12 @@
                   [#\R (r pos)])))
     (values (string-append acc (~s (v c))) c)))
 
-(define s (parse-lines (data-file 2)))
-(decode start s)
+(module+ main
+  (decode start (parse-file (data-file 2))))
 
 (module+ test
   (require rackunit)
 
   (check-equal? (decode start "ULL\nRRDDD\nLURDL\nUUUUD") "5DB3")
-  (check-equal? (decode start s) "46C92")
-
-  (printf "done~n"))
+  (check-equal? (decode start (parse-file (data-file 2))) "46C92")
+  )

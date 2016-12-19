@@ -62,6 +62,9 @@
   (sort (group-by-map length (group-by identity l))
         (lambda (a b) (< (first b) (first a)))))
 
+(define (parse-file in)
+  (port->string (if (input-port? in) in (open-input-file in))))
+
 (define (parse-lines in)
   (port->lines (if (input-port? in) in (open-input-file in))))
 
