@@ -2,7 +2,7 @@ task :default => :test
 
 def files
   n = ENV["N"]
-  f = (n && "day%02d*.rkt" % n.to_i) || ENV["F"] || "day*.rkt"
+  f = (n && "%02d*.rkt" % n.to_i) || ENV["F"] || "*.rkt"
 end
 
 task :test do
