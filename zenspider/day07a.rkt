@@ -9,14 +9,11 @@
          (eq? b c)
          (not (eq? a b)))))
 
-(define (notabba? s)
-  (not (abba? s)))
-
 (define (tls? ip)
   (define-values (nets nons) (partition (lambda (s) (eq? (string-ref s 0) #\[))
                                         (regexp-match* #px"\\[\\w+\\]|\\w+" ip)))
   (and (ormap abba? nons)
-       (andmap notabba? nets)))
+       (nonemap abba? nets)))
 
 (module+ test
   (require rackunit)

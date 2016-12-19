@@ -49,6 +49,9 @@
 (define (groups-of n l)
   (sequence->list (in-slice 3 (flatten l))))
 
+(define (nonemap f l)
+  (not (ormap f l)))
+
 (define (occur l)
   (sort (group-by-map length (group-by identity l))
         (lambda (a b) (< (first b) (first a)))))
