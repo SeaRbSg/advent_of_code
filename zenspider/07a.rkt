@@ -2,6 +2,11 @@
 
 (require "myutils.rkt")
 
+(define (parse ip)                      ; -> hypers supers
+  (partition (lambda (s) (eq? (string-ref s 0) #\[))
+             (regexp-match* #px"\\[\\w+\\]|\\w+" ip)))
+
+
 (define (abba? s)
   (for/or ([bytes (in-subs 4 (string->list s))])
     (define-list (a b c d) bytes)
@@ -10,10 +15,9 @@
          (not (eq? a b)))))
 
 (define (tls? ip)
-  (define-values (nets nons) (partition (lambda (s) (eq? (string-ref s 0) #\[))
-                                        (regexp-match* #px"\\[\\w+\\]|\\w+" ip)))
-  (and (ormap abba? nons)
-       (nonemap abba? nets)))
+  (define-values (hypers supers) (parse ip))
+  (and (ormap abba? supers)
+       (nonemap abba? hypers)))
 
 (module+ test
   (require rackunit)
