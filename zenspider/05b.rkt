@@ -1,8 +1,8 @@
-#lang racket
+#lang racket/base
 
-(require openssl/md5)
-(require openssl/sha1)
-(require "myutils.rkt")
+(require openssl/md5
+         openssl/sha1
+         "myutils.rkt")
 
 (define (md5hash s n [len 8])
   (define x (md5-bytes (open-input-string (string-append s (number->string n)))))
