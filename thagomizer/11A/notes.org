@@ -7,3 +7,23 @@ Generators can be around other generators
 Microchips can't be around generators unless connected to THEIR generator
 The elevator can carry one or two generators or microchips
 The elevator stops on each floor 
+
+* Thinking racket-y 
+** Represent items like this
+[:mc, "X"]  Microchip of type X
+[:g, "X"]   Generator of type X
+[:e]        Elevator
+
+** Represent building state like this
+[[items on floor 1], [items on floor 2]...]
+
+** Moves are represented like this
+[cargo, starting floor, ending floor]
+
+** Solve function
+Takes 
+- current state
+- goal state
+- list of moves made
+
+

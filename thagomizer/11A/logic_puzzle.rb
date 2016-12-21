@@ -1,15 +1,8 @@
 require 'pp'
 
 class LogicPuzzle
-  attr_accessor :floors, :elevator
-
-  def initialize
-    @floors = [[], [], [], []]
-    @elevator = 0
-  end
-
-  def safe?
-    @floors.each do |floor|
+  def self.safe? floors
+    floors.each do |floor|
       groups = floor.group_by { |item, element| item }
 
       return true if groups.length <= 1
@@ -22,29 +15,35 @@ class LogicPuzzle
     end
   end
 
-  def allowed_move? cargo, direction, starting_floor
+  def self.valid_move? state, move
+    cargo, start_floor, end_floor = *move
+
     return false unless cargo.length == 1 or cargo.length == 2
-    return false unless @elevator == starting_floor
-    return false if starting_floor == 0 and direction == :down
-    return false if starting_floor == 3 and direction == :up
+    return false if end_floor > 3
+    return false if end_floor < 0
+    return false unless state[start_floor].include? [:e]
 
     cargo.each do |c|
-      return false unless @floors[starting_floor].include?(c)
+      return false unless state[start_floor].include?(c)
     end
 
     true
   end
 
-  def move cargo, direction, starting_floor
-    raise "Invalid!" unless allowed_move?(cargo, direction, starting_floor)
 
-    new_floor = direction == :up ? starting_floor + 1 : starting_floor - 1
+
+  def self.move state, move
+    raise "Invalid!" unless valid_move?(state, move)
+
+    cargo, start_floor, end_floor = *move
+
+    cargo << [:e]
 
     cargo.each do |c|
-      @floors[starting_floor].delete c
-      @floors[new_floor] << c
+      state[start_floor].delete c
+      state[end_floor] << c
     end
 
-    @elevator = new_floor
+    state
   end
 end

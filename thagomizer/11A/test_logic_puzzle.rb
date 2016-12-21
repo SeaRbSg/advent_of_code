@@ -2,74 +2,66 @@ require 'minitest/autorun'
 require './logic_puzzle.rb'
 
 class LogicPuzzleTest < Minitest::Test
-  def setup
-    @puzzle = LogicPuzzle.new
-  end
-
-  def test_instantiation
-    assert @puzzle
-    assert_equal Array, @puzzle.floors.class
-  end
-
-  def test_safe_by_default
-    assert @puzzle.safe?
+  def test_empty_building_safe
+    LogicPuzzle.safe? [[], [], [], []]
   end
 
   def test_safe_microchips_with_microchips
-    @puzzle.floors = [[[:mc, "A"], [:mc, "B"]], [[:mc, "X"], [:mc, "Y"]]]
-    assert @puzzle.safe?
+    assert LogicPuzzle.safe? [[[:mc, "A"], [:mc, "B"]], [[:mc, "X"], [:mc, "Y"]]]
   end
 
   def test_safe_generators_with_generators
-    @puzzle.floors = [[[:g, "A"], [:g, "B"]], [[:g, "X"], [:g, "Y"]]]
-    assert @puzzle.safe?
+    assert LogicPuzzle.safe? [[[:g, "A"], [:g, "B"]], [[:g, "X"], [:g, "Y"]]]
   end
 
   def test_unsafe_chips_and_generators_mixed_type
-    @puzzle.floors =[[[:g, "A"], [:mc, "B"]], [[:g, "B"], [:mc, "A"]]]
-    refute @puzzle.safe?
+    refute LogicPuzzle.safe? [[[:g, "A"], [:mc, "B"]], [[:g, "B"], [:mc, "A"]]]
   end
 
   def test_invalid_move_no_cargo
-    @puzzle.floors = [[[:g, "A"]], [], [], []]
+    state = [[[:g, "A"]], [], [], []]
+    move  = [[], 0, 1]                  # Move nothing from floor 0 to floor 1
 
-    # Move nothing up one floor, start at floor 1
-    refute @puzzle.allowed_move? [], :up, 1
+    refute LogicPuzzle.valid_move? state, move
   end
 
   def test_valid_move
-    @puzzle.floors = [[[:g, "A"]], [], [], []]
+    state = [[[:g, "A"], [:e]], [], [], []]
+    move  = [[[:g, "A"]], 0, 1]
 
-    assert @puzzle.allowed_move? [[:g, "A"]], :up, 0
+    assert LogicPuzzle.valid_move? state, move
   end
 
   def test_invalid_move_cargo_not_there
-    @puzzle.floors = [[[:g, "A"]], [], [], []]
+    move = [[[:g, "B"]], 0, 1]
+    state = [[[:g, "A"]], [], [], []]
 
-    refute @puzzle.allowed_move? [[:g, "B"]], :up, 0
+    refute LogicPuzzle.valid_move? state, move
   end
 
   def test_invalid_move_building_bounds
-    @puzzle.floors = [[[:g, "A"]], [], [], []]
+    state = [[[:g, "A"]], [], [], []]
+    move  = [[[:g, "A"]], 0, -1]
 
-    refute @puzzle.allowed_move? [[:g, "A"]], :down, 0
+    refute LogicPuzzle.valid_move? state, move
 
-    @puzzle.elevator = 3
-    refute @puzzle.allowed_move? [[:g, "A"]], :up, 3
+    move = [[[:g, "A"]], 3, 4]
+    refute LogicPuzzle.valid_move? state, move
   end
 
   def test_invalid_move_elevator_on_wrong_floor
-    @puzzle.floors = [[[:g, "A"]], [], [], []]
-    @puzzle.elevator = 1
+    state = [[[:g, "A"]], [[:e]], [], []]
+    move = [[[:g, "A"]], 0, 1]
 
-    refute @puzzle.allowed_move? [[:g, "A"]], :up, 0
+    refute LogicPuzzle.valid_move? state, move
   end
 
   def test_move
-    @puzzle.floors = [[[:g, "A"]], [], [], []]
+    start_state = [[[:g, "A"], [:e]], [], [], []]
+    move = [[[:g, "A"]], 0, 1]
 
-    @puzzle.move [[:g, "A"]], :up, 0
+    end_state = [[], [[:g, "A"], [:e]], [], []]
 
-    assert_equal [[], [[:g, "A"]], [], []], @puzzle.floors
+    assert_equal end_state, LogicPuzzle.move(start_state, move)
   end
 end
