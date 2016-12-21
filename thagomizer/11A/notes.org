@@ -1,0 +1,9 @@
+* Goal
+Get everything to the top floor
+
+* Rules
+Microchips can be around other microchips
+Generators can be around other generators
+Microchips can't be around generators unless connected to THEIR generator
+The elevator can carry one or two generators or microchips
+The elevator stops on each floor 
