@@ -26,4 +26,14 @@ Takes
 - goal state
 - list of moves made
 
+Does
+- See if we're done
+- Calculates the list of possible moves
+- RECURSION
+
+*** Calculating the list of possible moves
+Figure out where the elevator is.
+
+Take all items on that floor 1 by 1 and 2 by 2 if possible and move them up or down one floor.
+If the new configuration is valid (and novel) recurse
 

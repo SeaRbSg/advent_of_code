@@ -30,8 +30,6 @@ class LogicPuzzle
     true
   end
 
-
-
   def self.move state, move
     raise "Invalid!" unless valid_move?(state, move)
 
@@ -46,4 +44,55 @@ class LogicPuzzle
 
     state
   end
+
+  def initialize
+    @cache       = {}
+    @debug       = false
+  end
+
+  def solve start_state, goal_state, moves_made
+    puts "STARTING"
+    pp start_state
+    pp goal_state
+
+    if start_state == goal_state then
+      puts "Moves Made #{moves_made.length}"
+      pp moves_made if @debug
+      return
+    end
+
+    elevator_at = start_state.index { |floor| floor.include? [:e] }
+
+    # Items one by one
+    move = nil
+    start_state[elevator_at].each do |item|
+      next if item == [:e]
+      if elevator_at != 3
+        move = [[item], elevator_at, elevator_at + 1]
+puts "move"
+pp move
+        if LogicPuzzle.valid_move? start_state, move
+          new_state = LogicPuzzle.move start_state.clone, move
+          solve(new_state, goal_state, moves_made + [move])
+        end
+      end
+
+#       if elevator_at != 0
+#         move = [[item], elevator_at, elevator_at - 1]
+# pp move
+#         if LogicPuzzle.valid_move? start_state, move
+# puts "Valid"
+#           new_state = LogicPuzzle.move start_state.clone, move
+#           solve new_state, goal_state, moves_made << move
+#         end
+#       end
+    end
+  end
 end
+
+lp = LogicPuzzle.new
+
+start_state = [[], [], [[:e], [:mc, "A"], [:g, "A"]], []]
+goal_state =  [[], [], [[:mc, "A"]], [[:g, "A"], [:e]]]
+
+lp.solve start_state, goal_state, []

@@ -34,7 +34,7 @@ class LogicPuzzleTest < Minitest::Test
 
   def test_invalid_move_cargo_not_there
     move = [[[:g, "B"]], 0, 1]
-    state = [[[:g, "A"]], [], [], []]
+    state = [[[:g, "A"], [:e]], [], [], []]
 
     refute LogicPuzzle.valid_move? state, move
   end
