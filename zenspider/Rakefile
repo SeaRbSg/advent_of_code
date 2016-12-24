@@ -2,7 +2,7 @@ task :default => :test
 
 def files
   n = ENV["N"]
-  f = (n && "%02d*.rkt" % n.to_i) || ENV["F"] || "*.rkt"
+  f = (n && "%02d*.rkt" % n.to_i) || ENV["F"] || "[0-9]*.rkt"
 end
 
 task :test do
