@@ -72,6 +72,10 @@
   (for/list ([line (parse-lines in)])
     (map string->number (string-split line))))
 
+(define (parse-lines-of-words in)
+  (for/list ([line (parse-lines in)])
+    (string-split line)))
+
 (define (rotate lls)
   (groups-of 3 (transpose lls)))
 
