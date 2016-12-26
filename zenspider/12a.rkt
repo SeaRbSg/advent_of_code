@@ -60,6 +60,9 @@
   (check-equal? (run in)
                 (register 6 42 0 0 0))
 
-  (check-equal? (run (data-file 12))
+  (check-equal? (run (data-file 12))              ; 12a
                 (register 23 318117 196418 0 0))
+
+  (check-equal? (run (data-file 12) '(0 0 0 1 0)) ; 12b
+                (register 23 9227771 5702887 0 0))
   )
