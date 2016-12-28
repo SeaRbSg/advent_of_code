@@ -4,14 +4,6 @@
 
 (struct register (pc a b c d) #:transparent)
 
-(define (get reg k)                     ; UGH
-  (match k
-    ['pc (register-pc reg)]
-    ['a (register-a reg)]
-    ['b (register-b reg)]
-    ['c (register-c reg)]
-    ['d (register-d reg)]))
-
 (define (set reg k v)                   ; UGH! struct-copy doesn't work w/ vars
   (define pc (register-pc reg))
   (match k
@@ -35,13 +27,17 @@
   (define max (vector-length ops))
 
   (define (execute reg)
-    (define (n/v x)   (if (number? x) x (get reg x)))
+    (define (n/v x)   (if (number? x) x (match x
+                                          ['a (register-a reg)]
+                                          ['b (register-b reg)]
+                                          ['c (register-c reg)]
+                                          ['d (register-d reg)])))
     (define (cpy x y) (set reg y (n/v x)))
     (define (jnz x y) (set reg 'pc (if (zero? (n/v x)) 1 y)))
     (define (inc x)   (set reg x (add1 (n/v x))))
     (define (dec x)   (set reg x (sub1 (n/v x))))
 
-    (define pc (get reg 'pc))
+    (define pc (register-pc reg))
 
     (match (and (< pc max) (vector-ref ops pc))
       [(list 'cpy x y) (execute (cpy x y))]
