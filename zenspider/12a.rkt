@@ -3,13 +3,14 @@
 (require "myutils.rkt")
 
 (struct register (pc a b c d) #:transparent)
-(define lookup (hasheq 'pc register-pc  ; UGH
-                       'a  register-a
-                       'b  register-b
-                       'c  register-c
-                       'd  register-d))
+
 (define (get reg k)                     ; UGH
-  ((hash-ref lookup k) reg))
+  (match k
+    ['pc (register-pc reg)]
+    ['a (register-a reg)]
+    ['b (register-b reg)]
+    ['c (register-c reg)]
+    ['d (register-d reg)]))
 
 (define (set reg k v)                   ; UGH! struct-copy doesn't work w/ vars
   (define pc (register-pc reg))
@@ -32,7 +33,6 @@
 
   (define ops (compile in))
   (define max (vector-length ops))
-  (define pc 0)
 
   (define (execute reg)
     (define (n/v x)   (if (number? x) x (get reg x)))
