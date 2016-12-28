@@ -1,0 +1,30 @@
+cpy a d
+cpy 4 c
+cpy 633 b
+mul c d c
+noop
+noop
+noop
+add d c d
+cpy d a
+noop
+mod d 2 a
+noop
+noop
+noop
+noop
+noop
+noop
+noop
+noop
+noop
+cpy 2 b
+jnz c 2
+jnz 1 4
+dec b
+dec c
+jnz 1 -4
+noop
+out b
+jnz a -19
+jnz 1 -21
