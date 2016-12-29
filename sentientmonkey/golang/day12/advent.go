@@ -89,6 +89,8 @@ func (cpu *Cpu) Decrease(register string) {
 }
 func main() {
 	cpu := NewCpu()
+	// init
+	cpu.registers["c"] = 1
 	reader := bufio.NewReader(os.Stdin)
 	cpu.Execute(reader)
 	fmt.Println(cpu.registers["a"])
