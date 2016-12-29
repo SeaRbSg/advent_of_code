@@ -47,7 +47,7 @@ func (cpu *Cpu) Run(instructions []Instruction) {
 	i := 0
 	for i < len(instructions) {
 		ins := instructions[i]
-		fmt.Printf("%d: %q\n", i, ins)
+		//fmt.Printf("%d: %q\n", i, ins)
 		switch ins.op {
 		case "cpy":
 			x := cpu.Value(ins.x)
