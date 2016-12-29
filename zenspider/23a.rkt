@@ -97,4 +97,6 @@
   (check-equal? (run (data-file 23) '(0 7 0 0 0)) ; 23a
                 (register 26 12330 1 0 0))
 
+  ;; (check-equal? (run (data-file 23) '(0 12 0 0 0)) ; 23b -- 355301ms
+  ;;               (register 26 479008890 1 0 0))
   )
