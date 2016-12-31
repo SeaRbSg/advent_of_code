@@ -117,9 +117,10 @@ func (cpu *Cpu) Toggle(ins Instruction) Instruction {
 	return ins
 }
 
+// ./advent < input.txt  359.90s user 3.05s system 100% cpu 6:00.48 total
 func main() {
 	cpu := NewCpu()
-	cpu.registers["a"] = 7
+	cpu.registers["a"] = 12
 	reader := bufio.NewReader(os.Stdin)
 	cpu.Execute(reader)
 	fmt.Println(cpu.registers["a"])
