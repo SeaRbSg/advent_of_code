@@ -17,8 +17,20 @@ type Cpu struct {
 	debug        bool
 }
 
+type Operation string
+
+const (
+	cpy Operation = "cpy"
+	inc Operation = "inc"
+	dec Operation = "dec"
+	jnz Operation = "jnz"
+	tgl Operation = "tgl"
+	out Operation = "out"
+)
+
 type Instruction struct {
-	op, x, y string
+	op   Operation
+	x, y string
 }
 
 func NewCpu() *Cpu {
@@ -36,11 +48,30 @@ func (cpu *Cpu) Execute(reader io.Reader) {
 	cpu.Run()
 }
 
+func (cpu *Cpu) ToOperation(value string) Operation {
+	switch value {
+	case "cpy":
+		return cpy
+	case "inc":
+		return inc
+	case "dec":
+		return dec
+	case "jnz":
+		return jnz
+	case "tgl":
+		return tgl
+	case "out":
+		return out
+	}
+
+	panic(fmt.Errorf("Unkown operation: %s", value))
+}
+
 func (cpu *Cpu) Parse(reader io.Reader) {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), " ")
-		instruction := Instruction{op: line[0], x: line[1]}
+		instruction := Instruction{op: cpu.ToOperation(line[0]), x: line[1]}
 
 		if len(line) > 2 {
 			instruction.y = line[2]
@@ -59,27 +90,27 @@ func (cpu *Cpu) Run() {
 			fmt.Printf("%d: %v\n", cpu.counter, ins)
 		}
 		switch ins.op {
-		case "cpy":
+		case cpy:
 			x := cpu.Value(ins.x)
 			cpu.Copy(x, ins.y)
-		case "inc":
+		case inc:
 			cpu.Increase(ins.x)
-		case "dec":
+		case dec:
 			cpu.Decrease(ins.x)
-		case "jnz":
+		case jnz:
 			x := cpu.Value(ins.x)
 			if x != 0 {
 				y := cpu.Value(ins.y)
 				cpu.counter += y
 				continue
 			}
-		case "tgl":
+		case tgl:
 			x := cpu.Value(ins.x)
 			addr := cpu.counter + x
 			if addr >= 0 && addr < len(cpu.instructions) {
 				cpu.instructions[addr] = cpu.Toggle(cpu.instructions[addr])
 			}
-		case "out":
+		case out:
 			x := cpu.Value(ins.x)
 			if !cpu.Output(x) {
 				return
@@ -132,14 +163,14 @@ func (cpu *Cpu) Decrease(register string) {
 
 func (cpu *Cpu) Toggle(ins Instruction) Instruction {
 	switch ins.op {
-	case "inc":
-		return Instruction{op: "dec", x: ins.x}
-	case "dec", "tgl":
-		return Instruction{op: "inc", x: ins.x}
-	case "jnz":
-		return Instruction{op: "cpy", x: ins.x, y: ins.y}
-	case "cpy":
-		return Instruction{op: "jnz", x: ins.x, y: ins.y}
+	case inc:
+		return Instruction{op: dec, x: ins.x}
+	case dec, tgl:
+		return Instruction{op: inc, x: ins.x}
+	case jnz:
+		return Instruction{op: cpy, x: ins.x, y: ins.y}
+	case cpy:
+		return Instruction{op: jnz, x: ins.x, y: ins.y}
 	}
 	return ins
 }
@@ -154,6 +185,7 @@ func main() {
 		startingA = i
 		fmt.Println(i)
 		cpu := NewCpu()
+		cpu.debug = true
 		cpu.registers["a"] = startingA
 		cpu.instructions = startingInstructions
 		cpu.Run()
