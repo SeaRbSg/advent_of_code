@@ -81,17 +81,9 @@ func (cpu *Cpu) Run() {
 			}
 		case "out":
 			x := cpu.Value(ins.x)
-			switch cpu.lastSignal {
-			case 1:
-				if x != 0 {
-					return
-				}
-			case 0:
-				if x != 1 {
-					return
-				}
+			if !cpu.Output(x) {
+				return
 			}
-			cpu.lastSignal = x
 		}
 		cpu.counter++
 	}
@@ -107,6 +99,21 @@ func (cpu *Cpu) Value(variable string) int {
 
 func (cpu *Cpu) ValidRegister(register string) bool {
 	return register >= "a" && register <= "d"
+}
+
+func (cpu *Cpu) Output(value int) bool {
+	switch cpu.lastSignal {
+	case 1:
+		if value != 0 {
+			return false
+		}
+	case 0:
+		if value != 1 {
+			return false
+		}
+	}
+	cpu.lastSignal = value
+	return true
 }
 
 func (cpu *Cpu) Copy(value int, register string) {
