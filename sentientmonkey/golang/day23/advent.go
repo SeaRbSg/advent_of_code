@@ -7,21 +7,26 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/profile"
 )
 
 type Cpu struct {
-	registers    map[string]int
+	registers    map[Variable]int
 	instructions []Instruction
 	counter      int
 	debug        bool
 }
 
+type Variable interface{}
+
 type Instruction struct {
-	op, x, y string
+	op   string
+	x, y Variable
 }
 
 func NewCpu() *Cpu {
-	return &Cpu{make(map[string]int), []Instruction{}, 0, false}
+	return &Cpu{make(map[Variable]int), []Instruction{}, 0, false}
 }
 
 func (cpu *Cpu) Execute(reader io.Reader) {
@@ -33,14 +38,25 @@ func (cpu *Cpu) Parse(reader io.Reader) {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), " ")
-		instruction := Instruction{op: line[0], x: line[1]}
+		x := cpu.ParseVariable(line[1])
+		instruction := Instruction{op: line[0], x: x}
 
 		if len(line) > 2 {
-			instruction.y = line[2]
+			y := cpu.ParseVariable(line[2])
+			instruction.y = y
 		}
 
 		cpu.instructions = append(cpu.instructions, instruction)
 	}
+}
+
+func (cpu *Cpu) ParseVariable(variable string) Variable {
+	if cpu.ValidRegister(variable) {
+		return variable
+	}
+
+	value, _ := strconv.Atoi(variable)
+	return value
 }
 
 func (cpu *Cpu) Run() {
@@ -77,30 +93,44 @@ func (cpu *Cpu) Run() {
 	}
 }
 
-func (cpu *Cpu) Value(variable string) int {
-	if value, err := strconv.Atoi(variable); err == nil {
-		return value
+func (cpu *Cpu) Value(variable Variable) int {
+
+	switch v := variable.(type) {
+	case string:
+		if cpu.ValidRegister(v) {
+			return cpu.registers[variable]
+		}
+	case int:
+		return v
 	}
 
-	return cpu.registers[variable]
+	return 0
 }
 
-func (cpu *Cpu) ValidRegister(register string) bool {
-	return register >= "a" && register <= "d"
+func (cpu *Cpu) ValidRegister(register Variable) bool {
+	if r, ok := register.(string); ok {
+		return r >= "a" && r <= "d"
+	}
+
+	return false
 }
 
-func (cpu *Cpu) Copy(value int, register string) {
+func (cpu *Cpu) Copy(value int, register Variable) {
 	if cpu.ValidRegister(register) {
 		cpu.registers[register] = value
 	}
 }
 
-func (cpu *Cpu) Increase(register string) {
-	cpu.registers[register]++
+func (cpu *Cpu) Increase(register Variable) {
+	if cpu.ValidRegister(register) {
+		cpu.registers[register]++
+	}
 }
 
-func (cpu *Cpu) Decrease(register string) {
-	cpu.registers[register]--
+func (cpu *Cpu) Decrease(register Variable) {
+	if cpu.ValidRegister(register) {
+		cpu.registers[register]--
+	}
 }
 
 func (cpu *Cpu) Toggle(ins Instruction) Instruction {
@@ -119,6 +149,7 @@ func (cpu *Cpu) Toggle(ins Instruction) Instruction {
 
 // ./advent < input.txt  359.90s user 3.05s system 100% cpu 6:00.48 total
 func main() {
+	defer profile.Start(profile.CPUProfile).Stop()
 	cpu := NewCpu()
 	cpu.registers["a"] = 12
 	reader := bufio.NewReader(os.Stdin)

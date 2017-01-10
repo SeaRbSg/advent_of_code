@@ -7,6 +7,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParseVariable(t *testing.T) {
+	cpu := NewCpu()
+	a := cpu.ParseVariable("a")
+	one := cpu.ParseVariable("1")
+
+	assert.Equal(t, "a", a)
+	assert.Equal(t, 1, one)
+}
+
 func TestCopy(t *testing.T) {
 	cpu := NewCpu()
 	cpu.Copy(41, "a")
@@ -31,10 +40,10 @@ func TestRun(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"inc", "a", ""},
-		{"cpy", "41", "b"},
-		{"dec", "b", ""},
+		{"cpy", 41, "a"},
+		{"inc", "a", nil},
+		{"cpy", 41, "b"},
+		{"dec", "b", nil},
 	}
 
 	cpu.Run()
@@ -46,12 +55,12 @@ func TestJumpIf(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"inc", "a", ""},
-		{"inc", "a", ""},
-		{"dec", "a", ""},
-		{"jnz", "a", "2"},
-		{"dec", "a", ""},
+		{"cpy", 41, "a"},
+		{"inc", "a", nil},
+		{"inc", "a", nil},
+		{"dec", "a", nil},
+		{"jnz", "a", 2},
+		{"dec", "a", nil},
 	}
 
 	cpu.Run()
@@ -62,7 +71,7 @@ func TestCopyVariable(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
+		{"cpy", 41, "a"},
 		{"cpy", "a", "b"},
 	}
 
@@ -74,9 +83,9 @@ func TestJumpIfInteger(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"jnz", "1", "2"},
-		{"inc", "a", ""},
+		{"cpy", 41, "a"},
+		{"jnz", 1, 2},
+		{"inc", "a", nil},
 	}
 
 	cpu.Run()
@@ -87,9 +96,9 @@ func TestToggleInc(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"tgl", "1", ""},
-		{"inc", "a", ""},
+		{"cpy", 41, "a"},
+		{"tgl", 1, nil},
+		{"inc", "a", nil},
 	}
 
 	cpu.Run()
@@ -100,9 +109,9 @@ func TestToggleDec(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"tgl", "1", ""},
-		{"dec", "a", ""},
+		{"cpy", 41, "a"},
+		{"tgl", 1, nil},
+		{"dec", "a", nil},
 	}
 
 	cpu.Run()
@@ -113,9 +122,9 @@ func TestToggleOutside(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"tgl", "2", ""},
-		{"inc", "a", ""},
+		{"cpy", 41, "a"},
+		{"tgl", 2, nil},
+		{"inc", "a", nil},
 	}
 
 	cpu.Run()
@@ -126,9 +135,9 @@ func TestToggleJump(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"tgl", "1", ""},
-		{"jnz", "42", "a"},
+		{"cpy", 41, "a"},
+		{"tgl", 1, nil},
+		{"jnz", 42, "a"},
 	}
 
 	cpu.Run()
@@ -139,9 +148,9 @@ func TestToggleCopy(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "41", "a"},
-		{"tgl", "1", ""},
-		{"cpy", "42", "a"},
+		{"cpy", 41, "a"},
+		{"tgl", 1, nil},
+		{"cpy", 42, "a"},
 	}
 
 	cpu.Run()
@@ -152,11 +161,11 @@ func TestToggleToggle(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"cpy", "0", "a"},
-		{"cpy", "1", "b"},
-		{"tgl", "a", ""},
-		{"dec", "b", ""},
-		{"jnz", "b", "-2"},
+		{"cpy", 0, "a"},
+		{"cpy", 1, "b"},
+		{"tgl", "a", nil},
+		{"dec", "b", nil},
+		{"jnz", "b", -2},
 	}
 
 	cpu.Run()
@@ -167,8 +176,8 @@ func TestSkipInvalid(t *testing.T) {
 	cpu := NewCpu()
 
 	cpu.instructions = []Instruction{
-		{"tgl", "1", ""},
-		{"jnz", "2", "1"},
+		{"tgl", 1, nil},
+		{"jnz", 2, 1},
 	}
 
 	cpu.Run()
@@ -187,12 +196,12 @@ dec a`
 
 	cpu.Parse(strings.NewReader(program))
 	expected := []Instruction{
-		{"cpy", "41", "a"},
-		{"inc", "a", ""},
-		{"inc", "a", ""},
-		{"dec", "a", ""},
-		{"jnz", "a", "2"},
-		{"dec", "a", ""},
+		{"cpy", 41, "a"},
+		{"inc", "a", nil},
+		{"inc", "a", nil},
+		{"dec", "a", nil},
+		{"jnz", "a", 2},
+		{"dec", "a", nil},
 	}
 
 	assert.Equal(t, expected, cpu.instructions)
