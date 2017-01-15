@@ -12,7 +12,7 @@ import (
 )
 
 type Cpu struct {
-	registers    map[Variable]int
+	registers    [5]int
 	instructions []Instruction
 	counter      int
 	debug        bool
@@ -26,7 +26,7 @@ type Instruction struct {
 }
 
 func NewCpu() *Cpu {
-	return &Cpu{make(map[Variable]int), []Instruction{}, 0, false}
+	return &Cpu{[5]int{}, []Instruction{}, 0, false}
 }
 
 func (cpu *Cpu) Execute(reader io.Reader) {
@@ -93,13 +93,40 @@ func (cpu *Cpu) Run() {
 	}
 }
 
+func (cpu *Cpu) RegisterIndex(register string) (int, bool) {
+	switch register {
+	case "a":
+		return 0, true
+	case "b":
+		return 1, true
+	case "c":
+		return 2, true
+	case "d":
+		return 3, true
+	}
+
+	return 0, false
+}
+
+func (cpu *Cpu) SetRegister(register string, value int) {
+	if index, ok := cpu.RegisterIndex(register); ok {
+		cpu.registers[index] = value
+	}
+}
+
+func (cpu *Cpu) GetRegister(register string) int {
+	if index, ok := cpu.RegisterIndex(register); ok {
+		return cpu.registers[index]
+	}
+
+	return 0
+}
+
 func (cpu *Cpu) Value(variable Variable) int {
 
 	switch v := variable.(type) {
 	case string:
-		if cpu.ValidRegister(v) {
-			return cpu.registers[variable]
-		}
+		return cpu.GetRegister(v)
 	case int:
 		return v
 	}
@@ -117,19 +144,23 @@ func (cpu *Cpu) ValidRegister(register Variable) bool {
 
 func (cpu *Cpu) Copy(value int, register Variable) {
 	if cpu.ValidRegister(register) {
-		cpu.registers[register] = value
+		cpu.SetRegister(register.(string), value)
 	}
 }
 
 func (cpu *Cpu) Increase(register Variable) {
 	if cpu.ValidRegister(register) {
-		cpu.registers[register]++
+		if index, ok := cpu.RegisterIndex(register.(string)); ok {
+			cpu.registers[index]++
+		}
 	}
 }
 
 func (cpu *Cpu) Decrease(register Variable) {
 	if cpu.ValidRegister(register) {
-		cpu.registers[register]--
+		if index, ok := cpu.RegisterIndex(register.(string)); ok {
+			cpu.registers[index]--
+		}
 	}
 }
 
@@ -151,8 +182,8 @@ func (cpu *Cpu) Toggle(ins Instruction) Instruction {
 func main() {
 	defer profile.Start(profile.CPUProfile).Stop()
 	cpu := NewCpu()
-	cpu.registers["a"] = 12
+	cpu.SetRegister("a", 12)
 	reader := bufio.NewReader(os.Stdin)
 	cpu.Execute(reader)
-	fmt.Println(cpu.registers["a"])
+	fmt.Println(cpu.GetRegister("a"))
 }

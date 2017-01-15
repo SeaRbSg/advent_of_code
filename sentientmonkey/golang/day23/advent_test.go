@@ -16,24 +16,35 @@ func TestParseVariable(t *testing.T) {
 	assert.Equal(t, 1, one)
 }
 
+func TestSetGetRegister(t *testing.T) {
+	cpu := NewCpu()
+
+	cpu.SetRegister("a", 42)
+	value := cpu.GetRegister("a")
+	assert.Equal(t, 42, value)
+
+	value = cpu.GetRegister("b")
+	assert.Zero(t, value)
+}
+
 func TestCopy(t *testing.T) {
 	cpu := NewCpu()
 	cpu.Copy(41, "a")
-	assert.Equal(t, 41, cpu.registers["a"])
+	assert.Equal(t, 41, cpu.GetRegister("a"))
 }
 
 func TestIncrease(t *testing.T) {
 	cpu := NewCpu()
 	cpu.Copy(41, "a")
 	cpu.Increase("a")
-	assert.Equal(t, 42, cpu.registers["a"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
 }
 
 func TestDecrease(t *testing.T) {
 	cpu := NewCpu()
 	cpu.Copy(41, "a")
 	cpu.Decrease("a")
-	assert.Equal(t, 40, cpu.registers["a"])
+	assert.Equal(t, 40, cpu.GetRegister("a"))
 }
 
 func TestRun(t *testing.T) {
@@ -47,8 +58,8 @@ func TestRun(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 42, cpu.registers["a"])
-	assert.Equal(t, 40, cpu.registers["b"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
+	assert.Equal(t, 40, cpu.GetRegister("b"))
 }
 
 func TestJumpIf(t *testing.T) {
@@ -64,7 +75,7 @@ func TestJumpIf(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 42, cpu.registers["a"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
 }
 
 func TestCopyVariable(t *testing.T) {
@@ -76,7 +87,7 @@ func TestCopyVariable(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 41, cpu.registers["b"])
+	assert.Equal(t, 41, cpu.GetRegister("b"))
 }
 
 func TestJumpIfInteger(t *testing.T) {
@@ -89,7 +100,7 @@ func TestJumpIfInteger(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 41, cpu.registers["a"])
+	assert.Equal(t, 41, cpu.GetRegister("a"))
 }
 
 func TestToggleInc(t *testing.T) {
@@ -102,7 +113,7 @@ func TestToggleInc(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 40, cpu.registers["a"])
+	assert.Equal(t, 40, cpu.GetRegister("a"))
 }
 
 func TestToggleDec(t *testing.T) {
@@ -115,7 +126,7 @@ func TestToggleDec(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 42, cpu.registers["a"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
 }
 
 func TestToggleOutside(t *testing.T) {
@@ -128,7 +139,7 @@ func TestToggleOutside(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 42, cpu.registers["a"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
 }
 
 func TestToggleJump(t *testing.T) {
@@ -141,7 +152,7 @@ func TestToggleJump(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 42, cpu.registers["a"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
 }
 
 func TestToggleCopy(t *testing.T) {
@@ -154,7 +165,7 @@ func TestToggleCopy(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 41, cpu.registers["a"])
+	assert.Equal(t, 41, cpu.GetRegister("a"))
 }
 
 func TestToggleToggle(t *testing.T) {
@@ -169,7 +180,7 @@ func TestToggleToggle(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 0, cpu.registers["a"])
+	assert.Equal(t, 0, cpu.GetRegister("a"))
 }
 
 func TestSkipInvalid(t *testing.T) {
@@ -181,7 +192,7 @@ func TestSkipInvalid(t *testing.T) {
 	}
 
 	cpu.Run()
-	assert.Equal(t, 0, cpu.registers["1"])
+	assert.Equal(t, 0, cpu.GetRegister("1"))
 }
 
 func TestParseProgram(t *testing.T) {
@@ -219,12 +230,11 @@ dec a`
 
 	cpu.Execute(strings.NewReader(program))
 
-	assert.Equal(t, 42, cpu.registers["a"])
+	assert.Equal(t, 42, cpu.GetRegister("a"))
 }
 
 func TestToggleProgram(t *testing.T) {
 	cpu := NewCpu()
-	cpu.debug = true
 
 	program := `cpy 2 a
 tgl a
@@ -236,5 +246,5 @@ dec a`
 
 	cpu.Execute(strings.NewReader(program))
 
-	assert.Equal(t, 3, cpu.registers["a"])
+	assert.Equal(t, 3, cpu.GetRegister("a"))
 }
