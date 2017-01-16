@@ -7,8 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/profile"
 )
 
 type Cpu struct {
@@ -142,23 +140,23 @@ func (cpu *Cpu) ValidRegister(register Variable) bool {
 	return false
 }
 
-func (cpu *Cpu) Copy(value int, register Variable) {
-	if cpu.ValidRegister(register) {
-		cpu.SetRegister(register.(string), value)
+func (cpu *Cpu) Copy(value int, variable Variable) {
+	if register, ok := variable.(string); ok {
+		cpu.SetRegister(register, value)
 	}
 }
 
-func (cpu *Cpu) Increase(register Variable) {
-	if cpu.ValidRegister(register) {
-		if index, ok := cpu.RegisterIndex(register.(string)); ok {
+func (cpu *Cpu) Increase(variable Variable) {
+	if register, ok := variable.(string); ok {
+		if index, ok := cpu.RegisterIndex(register); ok {
 			cpu.registers[index]++
 		}
 	}
 }
 
-func (cpu *Cpu) Decrease(register Variable) {
-	if cpu.ValidRegister(register) {
-		if index, ok := cpu.RegisterIndex(register.(string)); ok {
+func (cpu *Cpu) Decrease(variable Variable) {
+	if register, ok := variable.(string); ok {
+		if index, ok := cpu.RegisterIndex(register); ok {
 			cpu.registers[index]--
 		}
 	}
@@ -178,9 +176,9 @@ func (cpu *Cpu) Toggle(ins Instruction) Instruction {
 	return ins
 }
 
-// ./advent < input.txt  359.90s user 3.05s system 100% cpu 6:00.48 total
+// ./advent < input.txt  78.14s user 0.49s system 98% cpu 1:19.45 total
 func main() {
-	defer profile.Start(profile.CPUProfile).Stop()
+	//defer profile.Start(profile.CPUProfile).Stop()
 	cpu := NewCpu()
 	cpu.SetRegister("a", 12)
 	reader := bufio.NewReader(os.Stdin)
