@@ -26,6 +26,11 @@
 (define-syntax-rule (for/all  body ...) (for/and body ...))
 (define-syntax-rule (for/none body ...) (not (for/or body ...)))
 
+(define-syntax for/count
+  (syntax-rules ()
+    [(_ (vars ...) body ...+) (for/count (vars ...) (begin body ...+))] ; =>
+    [(_ (vars ...) body)      (for/sum (vars ... #:when body) 1)]))
+
 (define-syntax-rule (define-regexp (pat ...) re str)
   (match-define (regexp re (list _ pat ...)) str))
 
