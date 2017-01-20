@@ -50,9 +50,7 @@
   (check-equal? (ssl? "xyx[xyx]xyx") #f)
   (check-equal? (ssl? "aaa[kek]eke") #t)
   (check-equal? (ssl? "zazbz[bzb]cdb") #t)
-
-  (displayln "done"))
-
+  )
 
 (module+ main
   (count-lines (data-file 7) tls?)

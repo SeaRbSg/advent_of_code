@@ -26,8 +26,8 @@
   (define (compile in)
     (define num string->number)
     (define sym string->symbol)
-    (define (n/s x) (or (string->number x) (string->symbol x)))
-    (for/vector ([inst (parse-lines-of-words in)])
+    (define (n/s x) (or (num x) (sym x)))
+    (for/vector ([inst (in-list (parse-lines-of-words in))])
       (match inst
         [(list "inc" (app sym x))             `(inc ,x)]
         [(list "dec" (app sym x))             `(dec ,x)]
