@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/profile"
 )
 
 type Cpu struct {
@@ -19,9 +21,20 @@ type Cpu struct {
 type Variable interface{}
 
 type Instruction struct {
-	op   string
+	op   Operation
 	x, y Variable
 }
+
+type Operation int
+
+const (
+	cpy Operation = iota
+	inc
+	dec
+	jnz
+	tgl
+	invalid
+)
 
 func NewCpu() *Cpu {
 	return &Cpu{[5]int{}, []Instruction{}, 0, false}
@@ -32,12 +45,29 @@ func (cpu *Cpu) Execute(reader io.Reader) {
 	cpu.Run()
 }
 
+func (cpu *Cpu) ToOperation(s string) Operation {
+	switch s {
+	case "cpy":
+		return cpy
+	case "inc":
+		return inc
+	case "dec":
+		return dec
+	case "jnz":
+		return jnz
+	case "tgl":
+		return tgl
+	}
+
+	return invalid
+}
+
 func (cpu *Cpu) Parse(reader io.Reader) {
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := strings.Split(scanner.Text(), " ")
 		x := cpu.ParseVariable(line[1])
-		instruction := Instruction{op: line[0], x: x}
+		instruction := Instruction{op: cpu.ToOperation(line[0]), x: x}
 
 		if len(line) > 2 {
 			y := cpu.ParseVariable(line[2])
@@ -66,21 +96,21 @@ func (cpu *Cpu) Run() {
 			fmt.Printf("%d: %v\n", cpu.counter, ins)
 		}
 		switch ins.op {
-		case "cpy":
+		case cpy:
 			x := cpu.Value(ins.x)
 			cpu.Copy(x, ins.y)
-		case "inc":
+		case inc:
 			cpu.Increase(ins.x)
-		case "dec":
+		case dec:
 			cpu.Decrease(ins.x)
-		case "jnz":
+		case jnz:
 			x := cpu.Value(ins.x)
 			if x != 0 {
 				y := cpu.Value(ins.y)
 				cpu.counter += y
 				continue
 			}
-		case "tgl":
+		case tgl:
 			x := cpu.Value(ins.x)
 			addr := cpu.counter + x
 			if addr >= 0 && addr < len(cpu.instructions) {
@@ -164,21 +194,21 @@ func (cpu *Cpu) Decrease(variable Variable) {
 
 func (cpu *Cpu) Toggle(ins Instruction) Instruction {
 	switch ins.op {
-	case "inc":
-		return Instruction{op: "dec", x: ins.x}
-	case "dec", "tgl":
-		return Instruction{op: "inc", x: ins.x}
-	case "jnz":
-		return Instruction{op: "cpy", x: ins.x, y: ins.y}
-	case "cpy":
-		return Instruction{op: "jnz", x: ins.x, y: ins.y}
+	case inc:
+		return Instruction{op: dec, x: ins.x}
+	case dec, tgl:
+		return Instruction{op: inc, x: ins.x}
+	case jnz:
+		return Instruction{op: cpy, x: ins.x, y: ins.y}
+	case cpy:
+		return Instruction{op: jnz, x: ins.x, y: ins.y}
 	}
 	return ins
 }
 
 // ./advent < input.txt  78.14s user 0.49s system 98% cpu 1:19.45 total
 func main() {
-	//defer profile.Start(profile.CPUProfile).Stop()
+	defer profile.Start(profile.CPUProfile).Stop()
 	cpu := NewCpu()
 	cpu.SetRegister("a", 12)
 	reader := bufio.NewReader(os.Stdin)
