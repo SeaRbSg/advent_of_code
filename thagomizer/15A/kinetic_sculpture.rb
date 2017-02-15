@@ -1,5 +1,3 @@
-require 'pp'
-
 class Disk
   def initialize offset, positions, starting_position
     @offset = offset
