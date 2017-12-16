@@ -2,9 +2,14 @@
 
 class Problem01a
   def run input
+    o = offset input
     a = input.chars.to_a
-    b = a.dup.cycle(2).drop 1
+    b = a.dup.cycle(2).drop o
     a.zip(b).inject(0) { |acc, (n, m)| acc + (n == m ? n.to_i : 0) }
+  end
+
+  def offset _
+    1
   end
 end
 
