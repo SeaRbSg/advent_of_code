@@ -6,6 +6,7 @@
          racket/list
          racket/match
          racket/port
+         racket/runtime-path
          racket/sequence
          racket/string)
 
@@ -46,9 +47,10 @@
   (for/sum ([line (parse-lines in)])
     (if (f line) 1 0)))
 
+(define-runtime-path INPUT "input")
+
 (define (data-file n)
-  (build-path (find-system-path 'orig-dir)
-              "input"
+  (build-path INPUT
               (string-append (~0n n 2) ".txt")))
 
 (define (flatmap f lst)
@@ -67,11 +69,16 @@
   (sort (group-by-map length (group-by identity l))
         (lambda (a b) (< (first b) (first a)))))
 
+(define (->port in)
+  (cond [(input-port? in) in]
+        [(file-exists? in) (open-input-file in)]
+        [else (open-input-string in)]))
+
 (define (parse-file in)
-  (port->string (if (input-port? in) in (open-input-file in))))
+  (port->string (->port in)))
 
 (define (parse-lines in)
-  (port->lines (if (input-port? in) in (open-input-file in))))
+  (port->lines (->port in)))
 
 (define (parse-lines-of-numbers in)
   (for/list ([line (parse-lines in)])
@@ -91,3 +98,9 @@
 
 (define (~n n [w 1] [p " "])
   (~a n #:align 'right #:min-width w #:pad-string p))
+
+(define (~f flt [w 1] [d 2])
+  (~r flt #:min-width w #:precision d))
+
+(define (~f! flt [p 3])
+  (string->number (real->decimal-string flt p)))

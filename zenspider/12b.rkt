@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require (for-syntax racket/base)
+         racket/function
          racket/match
          "myutils.rkt")
 
@@ -46,6 +47,30 @@
 (define-namespace-anchor nsa)
 (define ns (namespace-anchor->namespace nsa))
 
+(begin-for-syntax
+  (require racket/syntax)
+  (define (setter id) (format-id id "~a!" id)))
+
+(define-syntax (cpy stx)
+  (syntax-case stx ()
+    [(cpy A B) #`(thunk (#,(setter #'B) A)        (pc++) (next))]))
+
+(define-syntax-rule (jnz A B)
+  (thunk                (pc+ (if (zero? A) 1 B))         (next)))
+
+(define-syntax (inc stx)
+  (syntax-case stx ()
+    [(inc A)   #`(thunk (#,(setter #'A) (add1 A)) (pc++) (next))]))
+
+(define-syntax (dec stx)
+  (syntax-case stx ()
+    [(_ A)     #`(thunk (#,(setter #'A) (sub1 A)) (pc++) (next))]))
+
+(define (maybe-expand op)
+  (parameterize ([current-namespace (namespace-anchor->namespace nsa)])
+    (if (procedure? op) op
+        (eval (expand op)))))
+
 (define (run in [initial-values #f])
   (define (compile in)
     (define (fn/1 fmt . args)
@@ -56,7 +81,7 @@
     (define sym string->symbol)
     (for/vector ([inst (in-list (parse-lines-of-words in))])
       (match inst
-        [(list "inc" x)                        (fn/1 "register-inc~a" x)]
+        [(list "inc" x)                        (maybe-expand `(inc ,(sym x)))]
         [(list "dec" x)                        (fn/1 "register-dec~a" x)]
         [(list "cpy" (?app num x) y)           (fn/2 (fn/1 "register-cpyn~a" y) x)]
         [(list "cpy" x y)                      (fn/1 "register-cpy~a~a" y x)]

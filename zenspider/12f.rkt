@@ -42,11 +42,7 @@
         [(list 'inc x)    (lambda (reg) (set reg x (add1 (get reg x))))]
         [(list 'dec x)    (lambda (reg) (set reg x (sub1 (get reg x))))]
         [(list 'cpy x y) `(cpy ,x ,y)]
-        [(list 'jnz x y) `(jnz ,x ,y)]
-
-        )
-      )
-    )
+        [(list 'jnz x y) `(jnz ,x ,y)])))
 
   (define ops (compile in))
   (define max (vector-length ops))
@@ -70,7 +66,7 @@
 
   (execute (apply register (or initial-values '(0 0 0 0 0)))))
 
-(module+ main
+(module+ test
   (require rackunit)
 
   (define in (open-input-string "cpy 41 a\ninc a\ninc a\ndec a\njnz a 2\ndec a"))
