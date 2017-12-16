@@ -12,12 +12,18 @@
   (set! bots (list->vector l))
   (set! output (make-list (length l) #f)))
 
+(define debug #f)
+
+(define (dprintf . args)
+  (when debug
+    (apply printf args)))
+
 (define (bot n v)
-  (printf "(bot ~a ~a)~n" n v)
+  (dprintf "(bot ~a ~a)~n" n v)
   (vector-set! bots n ((vector-ref bots n) v)))
 
 (define (out n v)
-  (printf "(out ~a ~a)~n" n v)
+  (dprintf "(out ~a ~a)~n" n v)
   (set! output (list-set output n v)))
 
 (define (check n l h)
@@ -26,7 +32,7 @@
 
 (define (delay n proc)
   (curry (lambda (a b)
-           (printf ";; triggering bot ~a with ~a & ~a~n" n a b)
+           (dprintf ";; triggering bot ~a with ~a & ~a~n" n a b)
            (apply (lambda (l h) (check n l h) (proc l h))
                   (sort (list a b) <)))))
 
@@ -47,8 +53,8 @@
                                   (s! low-obj) (n! low-num)
                                   (s! high-obj) (n! high-num)))
                    (cons from (delay from (lambda (l h)
-                                            (printf "WIRE: (~a ~a ~a)~n" low-obj low-num l)
-                                            (printf "WIRE: (~a ~a ~a)~n" high-obj high-num l)
+                                            (dprintf "WIRE: (~a ~a ~a)~n" low-obj low-num l)
+                                            (dprintf "WIRE: (~a ~a ~a)~n" high-obj high-num l)
                                             ((func low-obj) low-num l)
                                             ((func high-obj) high-num h))))]
                   [else (list 'no line)]
