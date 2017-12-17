@@ -24,6 +24,12 @@ class Problem02a
 end
 
 class Problem02b < Problem02a
+  def run input
+    lines_of_numbers(input).map { |a| # should use triangle enumeration
+      min, max = a.select { |n| a.any? { |m| n != m && ((((m / n) * n) == m) || (((n / m) * m) == n)) } }.minmax
+      max / min
+    }.sum
+  end
 end
 
 if __FILE__ == $0 then
@@ -38,7 +44,9 @@ if __FILE__ == $0 then
       end
 
       def test_b
-        flunk
+        input = "5 9 2 8\n9 4 7 3\n3 8 6 5"
+
+        assert_equal 9, Problem02b.new.run(input)
       end
     end
   else
