@@ -25,19 +25,29 @@ if __FILE__ == $0 then
   if ARGV.empty? then
     require "minitest/autorun"
 
-    class Test04 < Minitest::Test
-      def assert_valid input
-        assert_operator Problem04a.new, :valid?, input
+    class Test04a < Minitest::Test
+      attr_accessor :o
+
+      def setup
+        self.o = Problem04a.new
       end
 
-      def refute_valid input
-        refute_operator Problem04a.new, :valid?, input
+      def assert_uniq input
+        assert_operator o, :uniq?, o.words(input)
       end
 
-      def test_a_valid
-        assert_valid "aa bb cc dd ee"
-        assert_valid "aa bb cc dd aaa"
-        refute_valid "aa bb cc dd aa"
+      def refute_uniq input
+        refute_operator o, :uniq?, o.words(input)
+      end
+
+      def test_a_words
+        assert_equal %w[aa bb cc dd ee], o.words("aa bb cc dd ee")
+      end
+
+      def test_a_uniq
+        assert_uniq "aa bb cc dd ee"
+        assert_uniq "aa bb cc dd aaa"
+        refute_uniq "aa bb cc dd aa"
       end
 
       def test_b
