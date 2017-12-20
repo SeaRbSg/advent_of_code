@@ -21,6 +21,44 @@ class Problem03a
 end
 
 class Problem03b < Problem03a
+  AROUND = [[ 0,  1], [-1,  1], [-1,  0], [-1, -1],
+            [ 0, -1], [ 1, -1], [ 1,  0], [ 1,  1]]
+
+  def spiral n_rings
+    x, y, n = 0, 0, 1
+
+    map = { [x, y] => n }
+
+    n += 1
+    x += 1
+
+    n_rings.times.each do |ring|
+      len = 2 * (ring+2) - 1
+      # N            W           S            E
+      [[0, 1, -2], [-1, 0, -1], [0, -1, -1], [1, 0, 0]].each do |dx, dy, dlen|
+        (len+dlen).times do
+          map[[x, y]] = yield map, x, y, n
+          x += dx
+          y += dy
+          n += 1
+        end
+      end
+    end
+
+    map
+  end
+
+  def run m
+    n_rings = ring m
+
+    data = spiral(n_rings) { |map, x, y, n|
+      x = AROUND.map { |(dx, dy)| map[[x+dx, y+dy]] || 0 }.sum
+      break map if x > 2*m # TODO: this is a cheat
+      x
+    }
+
+    data.values.sort.find { |n| n > m }
+  end
 end
 
 if __FILE__ == $0 then
@@ -49,7 +87,13 @@ if __FILE__ == $0 then
       end
 
       def test_b
-        skip
+        assert_equal   4, Problem03b.new.run( 2), 2
+        assert_equal   4, Problem03b.new.run( 3), 3
+        assert_equal   5, Problem03b.new.run( 4), 4
+        assert_equal  10, Problem03b.new.run( 5), 5
+        assert_equal  10, Problem03b.new.run( 9), 9
+        assert_equal  23, Problem03b.new.run(12), 12
+        assert_equal  26, Problem03b.new.run(25), 23
       end
     end
   else
