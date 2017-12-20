@@ -16,15 +16,22 @@ class Problem05a
       count += 1
 
       jump = jumps[idx]
-      jumps[idx] += 1
+      morph
       self.idx += jump
     end
 
     count
   end
+
+  def morph
+    jumps[idx] += 1
+  end
 end
 
 class Problem05b < Problem05a
+  def morph
+    jumps[idx] += jumps[idx] > 2 ? -1 : 1
+  end
 end
 
 if __FILE__ == $0 then
@@ -37,7 +44,7 @@ if __FILE__ == $0 then
       end
 
       def test_b
-        skip
+        assert_equal 10, Problem05b.new.run("0 3 0 1 -3")
       end
     end
   else
