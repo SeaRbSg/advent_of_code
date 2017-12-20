@@ -5,9 +5,16 @@ class Problem04a
     File.readlines(path).count { |line| valid? line }
   end
 
-  def valid? input
-    words = input.split(/\s+/)
+  def words input
+    input.split(/\s+/)
+  end
+
+  def uniq? words
     words.count == words.uniq.count
+  end
+
+  def valid? input
+    uniq? self.words input
   end
 end
 
