@@ -4,6 +4,6 @@ end
 
 class String
   def integers
-    self.scan(/\d+/).map(&:to_i)
+    self.scan(/-?\d+/).map(&:to_i)
   end
 end
