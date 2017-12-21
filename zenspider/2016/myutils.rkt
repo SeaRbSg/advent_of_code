@@ -12,6 +12,9 @@
 
 (provide (all-defined-out))
 
+(module+ test
+  (require rackunit))
+
 (define-syntax-rule (define-list (pat ...) expr)
   (match-define (list pat ...) expr))
 
@@ -43,11 +46,23 @@
              (lambda (xs) (pair? (drop xs (sub1 n))))
              #f #f))))
 
+(define char->number (compose string->number list->string list))
+
+(module+ test
+  (check-equal? (char->number #\3) 3))
+
+(define (string->digits s)
+  (map char->number (string->list s)))
+
+(module+ test
+  (check-equal? (string->digits "1234") '(1 2 3 4)))
+
 (define (count-lines in f)
   (for/sum ([line (parse-lines in)])
     (if (f line) 1 0)))
 
-(define-runtime-path INPUT "input")
+(define-runtime-path INPUT (build-path (find-system-path 'orig-dir)
+                                       "input"))
 
 (define (data-file n)
   (build-path INPUT
@@ -104,3 +119,6 @@
 
 (define (~f! flt [p 3])
   (string->number (real->decimal-string flt p)))
+
+(module+ test
+  (displayln 'done))
