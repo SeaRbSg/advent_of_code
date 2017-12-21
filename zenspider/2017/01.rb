@@ -3,9 +3,9 @@
 class Problem01a
   def run input
     o = offset input
-    a = input.chars.to_a
+    a = input.chars.map(&:to_i)
     b = a.dup.cycle(2).drop o
-    a.zip(b).inject(0) { |acc, (n, m)| acc + (n == m ? n.to_i : 0) }
+    a.zip(b).sum { |(n, m)| n == m ? n : 0 }
   end
 
   def offset _
