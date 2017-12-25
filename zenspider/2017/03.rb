@@ -21,8 +21,9 @@ class Problem03a
 end
 
 class Problem03b < Problem03a
-  AROUND = [[ 0,  1], [-1,  1], [-1,  0], [-1, -1],
-            [ 0, -1], [ 1, -1], [ 1,  0], [ 1,  1]]
+  AROUND = [[-1,  1], [-1,  0], [-1, -1],
+            [ 0, -1],           [ 0,  1],
+            [ 1, -1], [ 1,  0], [ 1,  1]]
 
   def spiral n_rings
     x, y, n = 0, 0, 1

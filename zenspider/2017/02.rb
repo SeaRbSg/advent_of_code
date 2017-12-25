@@ -18,7 +18,11 @@ end
 class Problem02b < Problem02a
   def run input
     lines_of_numbers(input).map { |a| # should use triangle enumeration
-      min, max = a.select { |n| a.any? { |m| n != m && ((((m / n) * n) == m) || (((n / m) * m) == n)) } }.minmax
+      min, max = a.select { |n|
+        a.any? { |m|
+          n != m && ((((m / n) * n) == m) || (((n / m) * m) == n))
+        }
+      }.minmax
       max / min
     }.sum
   end

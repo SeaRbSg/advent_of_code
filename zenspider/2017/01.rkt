@@ -1,6 +1,8 @@
-#lang racket
+#lang racket/base
 
-(require "../2016/myutils.rkt")
+(require racket/sequence
+         racket/string
+         "../2016/myutils.rkt")
 
 (module+ test
   (require rackunit))
@@ -8,7 +10,8 @@
 (define (problem-01 input offset-proc)
   (define numbers (string->digits (string-trim input)))
   (for/sum ([a (in-list numbers)]
-            [b (sequence-tail (in-cycle numbers) (offset-proc numbers))])
+            [b (sequence-tail (in-cycle numbers)
+                              (offset-proc numbers))])
     (if (eq? a b) a 0)))
 
 (define (problem-01a input)
