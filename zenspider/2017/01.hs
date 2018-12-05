@@ -9,7 +9,7 @@ problem01 :: String -> ([Int] -> Int) -> Int
 problem01 input offset_proc =
   sum $ zipWith (curry f) a b
   where
-    a = map digitToInt input
+    a = fmap digitToInt input
     b = drop (offset_proc a) (a ++ a)
     f (m, n) = if m == n
                then m
