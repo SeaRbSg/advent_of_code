@@ -1,19 +1,9 @@
 import Data.Char (toLower)
 import Data.List (minimumBy)
 import Data.Function (on)
+import Utils (minteract)
 
 {-# ANN input "HLint: ignore Defined but not used" #-}
-
--- TODO: move into my own support module:a
-minteract :: [String -> String] -> IO ()
-minteract fs =
-  do s <- getContents
-     each fs s
-  where
-    each :: [String -> String] -> String -> IO ()
-    each [] _     = return ()
-    each (f:xs) s = do putStrLn (f s)
-                       each xs s
 
 clean :: String -> String
 clean = foldr go ""
