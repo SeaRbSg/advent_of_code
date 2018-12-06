@@ -15,4 +15,4 @@ minteract fs =
      traverse_ (putStrLn . ($ s)) fs
 
 occur :: Ord a => [a] -> Map a Int
-occur = M.fromListWith (+) . map (,1)
+occur = M.fromListWith (+) . fmap (,1)

@@ -25,7 +25,7 @@ solve2 ss = [ c
             | a <- ss
             , b <- ss
             , a > b
-            , let c = fmap fst $ filter (uncurry (==)) $ a `zip` b
+            , let c = fmap fst . filter (uncurry (==)) $ a `zip` b
             , length a - length c == 1
             ]
 
@@ -33,7 +33,7 @@ solve3 :: [String] -> [String]
 solve3 ss = do a <- ss
                b <- ss
                guard $ a > b
-               let c = fmap fst $ filter (uncurry (==)) $ a `zip` b
+               let c = fmap fst . filter (uncurry (==)) $ a `zip` b
                guard $ length a - length c == 1
                pure c
 

@@ -3,7 +3,7 @@ import Data.List (minimumBy)
 import Data.Function (on)
 import Utils (minteract)
 
-{-# ANN input "HLint: ignore Defined but not used" #-}
+{-# ANN input' "HLint: ignore Defined but not used" #-}
 
 clean :: String -> String
 clean = foldr go ""
@@ -21,10 +21,10 @@ problem2 :: String -> String
 problem2 =
   dispatch (\s ->
               minimumBy (compare `on` length) $
-              map (\c -> clean $ filter ((/= c) . toLower) s) ['a' .. 'z'])
+              fmap (\c -> clean $ filter ((/= c) . toLower) s) ['a' .. 'z'])
 
 main :: IO ()
 main = minteract [problem1, problem2]
 
-input :: String
-input = "dabAcCaCBAcCcaDA"
+input' :: String
+input' = "dabAcCaCBAcCcaDA"

@@ -38,7 +38,7 @@ allCoords :: [Region] -> [CoordT]
 allCoords = concatMap coords
 
 mapOverlap :: [Region] -> M.Map Coord Int
-mapOverlap = occur . map fst . allCoords
+mapOverlap = occur . fmap fst . allCoords
 
 overlapping :: [Region] -> M.Map Coord Int
 overlapping = M.filter (>1) . mapOverlap
@@ -47,7 +47,7 @@ countOverlap :: [Region] -> Int
 countOverlap rs = length $ overlapping rs
 
 problem1 :: String -> String
-problem1 = show . countOverlap . map parse . lines
+problem1 = show . countOverlap . fmap parse . lines
 
 main :: IO ()
 main = minteract [problem1]

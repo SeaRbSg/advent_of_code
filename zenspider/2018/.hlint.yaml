@@ -1,0 +1,15 @@
+# HLint configuration file
+# https://github.com/ndmitchell/hlint
+##########################
+
+- modules:
+  - {name: Control.Arrow, within: []} # Certain modules are banned entirely
+
+- group: {name: dollar,     enabled: true}
+- group: {name: generalise, enabled: true}
+- group: {name: generalise-for-conciseness, enabled: true}
+
+- ignore: {name: "Use tuple-section"}
+- ignore: {name: "Use &&&"}
+- ignore: {name: "Use <>"}
+- ignore: {name: "Use <$>"}
