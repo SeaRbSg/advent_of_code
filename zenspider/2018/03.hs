@@ -8,7 +8,8 @@ import qualified Data.Map as M
 {-# ANN s'     "HLint: ignore Defined but not used" #-}
 
 type Coord  = (Int, Int)
-type Region = (Int, Int, Int, Int)
+type CoordT = (Coord, Int)
+type Region = (Int, Int, Int, Int, Int)
 
 input' :: String
 input' = "#1 @ 1,3: 4x4\n#2 @ 3,1: 4x4\n#3 @ 5,5: 2x2"
@@ -27,20 +28,26 @@ lex :: String -> [String]
 lex = groupBy (\a b -> isDigit a `xnor` isDigit b)
 
 parse :: String -> Region
-parse s = (read a, read b, read c, read d)
-  where [_, _, _, a, _, b, _, c, _, d] = lex s
+parse s = (read n, read a, read b, read c, read d)
+  where [_, n, _, a, _, b, _, c, _, d] = lex s
 
-coords :: Region -> [Coord]
-coords (x,y,w,h) = [(a+x,b+y) | a <- [1..w], b <- [1..h]]
+coords :: Region -> [CoordT]
+coords (n,x,y,w,h) = [((a+x,b+y), n) | a <- [1..w], b <- [1..h]]
 
-allCoords :: [Region] -> [Coord]
+allCoords :: [Region] -> [CoordT]
 allCoords = concatMap coords
 
-overlapping :: [Region] -> Int
-overlapping = length . M.filter (>1) . occur . allCoords
+mapOverlap :: [Region] -> M.Map Coord Int
+mapOverlap = occur . map fst . allCoords
+
+overlapping :: [Region] -> M.Map Coord Int
+overlapping = M.filter (>1) . mapOverlap
+
+countOverlap :: [Region] -> Int
+countOverlap rs = length $ overlapping rs
 
 problem1 :: String -> String
-problem1 = show . overlapping . map parse . lines
+problem1 = show . countOverlap . map parse . lines
 
 main :: IO ()
 main = minteract [problem1]
