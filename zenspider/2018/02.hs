@@ -20,14 +20,16 @@ problem1 :: String -> String
 problem1 = show . solve1 . lines
 
 solve2 :: [String] -> [String]
-solve2 ss = [ fmap fst $ filter (uncurry (==)) $ a `zip` b
+solve2 ss = [ c
             | a <- ss
             , b <- ss
             , a > b
-            , 1 == sum (fmap (\(c, d) -> one $ c /= d) (a `zip` b))]
+            , let c = fmap fst $ filter (uncurry (==)) $ a `zip` b
+            , length a - length c == 1
+            ]
 
 problem2 :: String -> String
-problem2 = show . solve2 . lines
+problem2 = head . solve2 . lines
 
 main :: IO ()
 main = minteract [problem1, problem2]
