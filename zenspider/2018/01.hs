@@ -7,14 +7,14 @@ parseInt = read . filter (/= '+')
 problem1 :: String -> String
 problem1 = show . sum . map parseInt . lines
 
-firstRepeated :: Ord a => [a] -> a
-firstRepeated = go S.empty
+second :: Ord a => [a] -> a
+second = go S.empty
   where go _    []     = error "Nope!"
         go seen (x:xs) = if x `S.member` seen then x else go (x `S.insert` seen) xs
 
 problem2 :: String -> String
 problem2 = show . solve . cycle . map parseInt . lines
-  where solve ns = firstRepeated $ sums ns
+  where solve ns = second $ sums ns
         sums     = scanl (+) 0
 
 main :: IO ()
