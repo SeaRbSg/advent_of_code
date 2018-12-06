@@ -7,6 +7,9 @@ import qualified Data.Map as M
 {-# ANN input' "HLint: ignore Defined but not used" #-}
 {-# ANN s'     "HLint: ignore Defined but not used" #-}
 
+type Coord  = (Int, Int)
+type Region = (Int, Int, Int, Int)
+
 input' :: String
 input' = "#1 @ 1,3: 4x4\n#2 @ 3,1: 4x4\n#3 @ 5,5: 2x2"
 s' :: String
@@ -23,21 +26,21 @@ xnor = xor . not
 lex :: String -> [String]
 lex = groupBy (\a b -> isDigit a `xnor` isDigit b)
 
-parse :: String -> (Int, Int, Int, Int)
+parse :: String -> Region
 parse s = (read a, read b, read c, read d)
   where [_, _, _, a, _, b, _, c, _, d] = lex s
 
-coords :: (Int, Int, Int, Int) -> [(Int,Int)]
+coords :: Region -> [Coord]
 coords (x,y,w,h) = [(a+x,b+y) | a <- [1..w], b <- [1..h]]
 
-allCoords :: String -> [(Int, Int)]
-allCoords s = concatMap (coords . parse) $ lines s
+allCoords :: [Region] -> [Coord]
+allCoords = concatMap coords
 
-overlapping :: String -> Int
-overlapping s = length $ M.filter (>1) $ occur $ allCoords s
+overlapping :: [Region] -> Int
+overlapping = length . M.filter (>1) . occur . allCoords
 
 problem1 :: String -> String
-problem1 s = show $ overlapping s
+problem1 = show . overlapping . map parse . lines
 
 main :: IO ()
 main = minteract [problem1]
