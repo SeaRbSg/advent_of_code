@@ -1,20 +1,14 @@
-import Prelude hiding (lex)
+import Prelude hiding (lex, all)
 import Data.Char (isDigit)
-import Data.List (groupBy, concatMap)
+import qualified Data.List as L
 import Utils (occur, minteract)
+import Data.Map (Map)
 import qualified Data.Map as M
 
-{-# ANN input' "HLint: ignore Defined but not used" #-}
-{-# ANN s'     "HLint: ignore Defined but not used" #-}
-
 type Coord  = (Int, Int)
-type CoordT = (Coord, Int)
-type Region = (Int, Int, Int, Int, Int)
-
-input' :: String
-input' = "#1 @ 1,3: 4x4\n#2 @ 3,1: 4x4\n#3 @ 5,5: 2x2"
-s' :: String
-s' = head $ lines input'
+type CoordT = (Int, Coord)
+type Job    = Int
+type Region = (Job, Int, Int, Int, Int)
 
 xor :: Bool -> Bool -> Bool
 xor True  False = True
@@ -25,20 +19,24 @@ xnor :: Bool -> Bool -> Bool
 xnor = xor . not
 
 lex :: String -> [String]
-lex = groupBy (\a b -> isDigit a `xnor` isDigit b)
+lex = L.groupBy (\a b -> isDigit a `xnor` isDigit b)
 
 parse :: String -> Region
 parse s = (read n, read a, read b, read c, read d)
   where [_, n, _, a, _, b, _, c, _, d] = lex s
 
 coords :: Region -> [CoordT]
-coords (n,x,y,w,h) = [((a+x,b+y), n) | a <- [1..w], b <- [1..h]]
+coords (n,x,y,w,h) = [(n, (a+x,b+y)) | a <- [1..w], b <- [1..h]]
 
 allCoords :: [Region] -> [CoordT]
-allCoords = concatMap coords
+allCoords = L.concatMap coords
+
+mmapBy :: Ord k => (b -> k) -> (b -> a) -> [b] -> Map k [a]
+mmapBy kf af = foldl go M.empty
+  where go m b = M.insertWith (++) (kf b) [af b] m
 
 mapOverlap :: [Region] -> M.Map Coord Int
-mapOverlap = occur . fmap fst . allCoords
+mapOverlap = occur . fmap snd . allCoords
 
 overlapping :: [Region] -> M.Map Coord Int
 overlapping = M.filter (>1) . mapOverlap
@@ -46,8 +44,20 @@ overlapping = M.filter (>1) . mapOverlap
 countOverlap :: [Region] -> Int
 countOverlap rs = length $ overlapping rs
 
+findNonOverlap :: [Region] -> [Job]
+findNonOverlap rs = M.keys solo
+  where solo      = M.filter allUnique jobs
+        allUnique = L.all unique
+        unique c' = 1 == length (byCoords M.! c')
+        jobs      = mmapBy fst snd all -- jobId -> [coord]
+        byCoords  = mmapBy snd fst all -- coord -> [jobId]
+        all       = allCoords rs
+
 problem1 :: String -> String
 problem1 = show . countOverlap . fmap parse . lines
 
+problem2 :: String -> String
+problem2 = show . findNonOverlap . fmap parse . lines
+
 main :: IO ()
-main = minteract [problem1]
+main = minteract [problem1, problem2]
