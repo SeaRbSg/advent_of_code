@@ -1,7 +1,7 @@
 import Prelude hiding (lex, all)
 import Data.Char (isDigit)
 import qualified Data.List as L
-import Utils (occur, minteract)
+import Utils (minteract, mmapBy, occur)
 import Data.Map (Map)
 import qualified Data.Map as M
 
@@ -31,14 +31,10 @@ coords (n,x,y,w,h) = [(n, (a+x,b+y)) | a <- [1..w], b <- [1..h]]
 allCoords :: [Region] -> [CoordT]
 allCoords = L.concatMap coords
 
-mmapBy :: Ord k => (b -> k) -> (b -> a) -> [b] -> Map k [a]
-mmapBy kf af = foldl go M.empty
-  where go m b = M.insertWith (++) (kf b) [af b] m
-
-mapOverlap :: [Region] -> M.Map Coord Int
+mapOverlap :: [Region] -> Map Coord Int
 mapOverlap = occur . fmap snd . allCoords
 
-overlapping :: [Region] -> M.Map Coord Int
+overlapping :: [Region] -> Map Coord Int
 overlapping = M.filter (>1) . mapOverlap
 
 countOverlap :: [Region] -> Int

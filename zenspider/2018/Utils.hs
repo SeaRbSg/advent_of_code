@@ -2,6 +2,7 @@
 
 module Utils
   ( minteract
+  , mmapBy
   , occur
   ) where
 
@@ -16,3 +17,7 @@ minteract fs =
 
 occur :: Ord a => [a] -> Map a Int
 occur = M.fromListWith (+) . fmap (,1)
+
+mmapBy :: Ord k => (b -> k) -> (b -> a) -> [b] -> Map k [a]
+mmapBy kf af = foldl go M.empty
+  where go m b = M.insertWith (++) (kf b) [af b] m
