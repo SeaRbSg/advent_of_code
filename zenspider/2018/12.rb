@@ -1,19 +1,8 @@
 #!/usr/bin/env ruby -w
 
-state = nil
+INF = 1 / 0.0
 
-# A note like ..#.. => . means that a pot that contains a plant but
-# with no plants within two pots of it will not have a plant in it
-# during the next generation.
-
-# A note like ##.## => . means that an empty pot with two plants on
-# each side of it will remain empty in the next generation.
-
-# A note like .##.# => # means that a pot has a plant in a given
-# generation if, in the previous generation, there were plants in that
-# pot, the one immediately to the left, and the one two pots to the
-# right, but not in the ones immediately to the right and two to the
-# left.
+initial = nil
 
 map = Hash.new "."
 
@@ -26,7 +15,7 @@ input = if ARGV.empty? then
 input.each_line do |line|
   case line
   when /initial state: (.+)/ then
-    state = $1
+    initial = $1
   when /^([\.\#]+) => ([\.\#])/ then
     map[$1] = $2
   when /^$/ then
@@ -36,39 +25,84 @@ input.each_line do |line|
   end
 end
 
-offset = -3
-state[0,0] = "..."
-state << ("." * 20)
+def run state, map, iters
+  state = state.dup
+  orig  = state.dup
 
-states = [state.dup]
+  seen = Hash.new 0
 
-# puts "%2d: %s" % [0, state]
-20.times do |gen|
-  ns = state.dup
+  offset = -3
+  state.prepend "..."
+  state << ("." * 1000)
+  state.sub!(/#\.{4,}$/, '#...')
 
-  (0..state.size-3).each do |idx|
-    ns[idx+2] = map[state[idx, 5]]
+  iters.times do |gen|
+    ns = state.dup
+
+    (0..state.size-3).each do |idx|
+      ns[idx+2] = map[state[idx, 5]]
+    end
+
+    state = ns
+
+    idx = state.index "#"
+    case
+    when idx < 3 then
+      diff = 3 - idx
+      state.prepend "." * diff
+      offset -= diff
+    when idx > 4 then
+      diff = idx - 3
+      state.delete_prefix! "." * diff
+      offset += diff
+    end
+
+    # cheating... I don't care... I'm tired
+    state << ("." * 1000)
+    state.sub!(/#\.{4,}$/, '#...')
+
+    score = state.chars.zip(offset..INF).find_all { |c,_| c == "#" }.map(&:last).sum
+    # $stderr.puts "%8d: score = %5d off = %4d state = %s" % [gen+1, score, offset, state]
+
+    key = state.dup
+    if seen[key] > 5 then
+      warn "pattern detected! (maybe)"
+
+      break
+    end
+    seen[key] += 1
+
+    break if state == orig
   end
 
-  state = ns
+  warn "done"
 
-  if state[0, 3].include? "#" then
-    state[0,0] = "..."
-    offset -= 3
-    warn "offset... #{offset}"
-  end
-
-  states << state.dup
-
-  # puts "%2d: %s" % [gen+1, state]
+  return offset, state
 end
 
-puts states.last
+offset, state = run initial, map, 20
+p state.chars.zip(offset..INF).find_all { |c,_| c == "#" }.map(&:last).sum
 
-p states.last.chars.zip(offset..999).find_all { |c,_| c == "#" }.minmax
+t0 = Time.now
+offset, state = run initial, map, 110_000
+p offset, state
+p state.chars.zip(offset..INF).find_all { |c,_| c == "#" }.map(&:last).sum
+p Time.now - t0
 
-p states.last.chars.zip(offset..999).find_all { |c,_| c == "#" }.map(&:last).sum
+# 12b: solved in mathematica:
+#
+# In[12]:= FindFormula[{{134, 11873}, {135, 11959}, {136, 12045}, {137,
+#    12131}, {138, 12217}, {139, 12303}, {140, 12389}, {141,
+#    12475}, {142, 12561}, {143, 12647}, {144, 12733}, {145,
+#    12819}, {146, 12905}}, x]
+#
+# Out[12]= 349. + 86. x
 
+def f x
+  349 + 86 * x
+end
+
+p f 50_000_000_000
 
 __END__
 initial state: #..#.#..##......###...###
