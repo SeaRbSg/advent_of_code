@@ -1,9 +1,13 @@
 {-# LANGUAGE RecordWildCards #-} -- for R {..} -> R { a=a, b=b ... }
-{-# OPTIONS_GHC -Wno-type-defaults #-}
+{-# OPTIONS_GHC -Wall -Wno-unused-top-binds -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-imports -Wno-type-defaults #-}
 
 import Data.Char
 import Data.Bits
-import Utils (cleanStr, minteract, splitString, splitEvery, xinteract)
+import Utils (cleanStr, minteract, mmapBy, readi, splitEvery, splitString, xinteract)
+
+import qualified Data.List as L
+import qualified Data.Map as M
+
 -- for testing:
 import Test.HUnit
 import System.Environment (getEnv)
@@ -20,6 +24,14 @@ type Op       = Register -> Instruction -> Register
 data Reg         = R0 | R1 | R2 | R3               deriving (Show, Eq, Ord, Enum)
 data Register    = R { r0, r1, r2, r3 :: Int }     deriving (Show, Eq, Ord)
 data Instruction = I { op, a, b :: Int, c :: Reg } deriving (Show, Eq)
+
+newR :: Register
+newR = R 0 0 0 0
+
+newI :: String -> Instruction
+newI s = I op a b c
+  where [op, a, b, cc] = fmap readi $ words s
+        c = i2r cc
 
 i2r :: Int -> Reg
 i2r = toEnum
@@ -53,22 +65,22 @@ upir r I {..} fn = set r c (a `fn` get r b)
 addr, addi, mulr, muli, banr, bani, borr, bori,
   setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr :: Op
 
-addr r o = uprr r o (+)
-addi r o = upri r o (+)
-mulr r o = uprr r o (*)
-muli r o = upri r o (*)
-banr r o = uprr r o (.&.)
-bani r o = upri r o (.&.)
-borr r o = uprr r o (.|.)
-bori r o = upri r o (.|.)
-setr r o = uprr r o const
-seti r o = set r (c o) (a o)
-gtir r o = upir r o gti
-gtri r o = upri r o gti
-gtrr r o = uprr r o gti
-eqir r o = upir r o eqi
-eqri r o = upri r o eqi
-eqrr r o = uprr r o eqi
+addr r o = uprr r o (+)      --  1 opcode, see `ins` below
+addi r o = upri r o (+)      -- 13
+mulr r o = uprr r o (*)      -- 15
+muli r o = upri r o (*)      -- 14
+banr r o = uprr r o (.&.)    --  0
+bani r o = upri r o (.&.)    --  9
+borr r o = uprr r o (.|.)    --  8
+bori r o = upri r o (.|.)    --  5
+setr r o = uprr r o const    --  3
+seti r o = set r (c o) (a o) --  7
+gtir r o = upir r o gti      --  6
+gtri r o = upri r o gti      -- 12
+gtrr r o = uprr r o gti      --  4
+eqir r o = upir r o eqi      -- 10
+eqri r o = upri r o eqi      --  2
+eqrr r o = uprr r o eqi      -- 11
 
 booli    :: Bool -> Int
 booli b   = if b then 1 else 0
@@ -101,13 +113,48 @@ parse ss = (r, i, e)
 solve1 :: (Register, Instruction, Register) -> Int
 solve1 (r, e, i) = countOps r e i
 
+-- ( 0, [   _, _,    4,    _, _, _, _,     __,     __,     __ ]), -- 4
+-- ( 1, [0, _, _, _                                           ]), -- 0
+-- ( 2, [                           _,                 14, __ ]), -- 14
+-- ( 3, [_, _,             _, _, 8, _, __, __, __             ]), -- 8
+-- ( 4, [                           _,     __, 12, __, __     ]), -- 12
+-- ( 5, [_, _, _, _,       _, 7                               ]), -- 7
+-- ( 6, [                           _, 10, __, __, __, __, __ ]), -- 10
+-- ( 7, [_, _, _,          _, _,    9                         ]), -- 9
+-- ( 8, [_,    _,          6                                  ]), -- 6
+-- ( 9, [_, _, _, _, _, 5, _, _, _, _, __, __, __             ]), -- 5
+-- (10, [_,                _,       _,             13, __     ]), -- 13
+-- (11, [                           _,                     15 ]), -- 15
+-- (12, [                           _,     11,     __,     __ ]), -- 11
+-- (13, [   1,    _                                           ]), -- 1
+-- (14, [         3                                           ]), -- 3
+-- (15, [   _, 2, _                                           ])  -- 2
+
+ins :: [Op]
+ins = [banr,addr,eqri,setr,gtrr,bori,gtir,seti,
+       borr,bani,eqir,eqrr,gtri,addi,muli,mulr]
+
+solve2 :: Register -> Instruction -> Register
+solve2 r i = (ins L.!! op i) r i
+
+-- TODO: stupid name
+munge :: String -> ([[String]], [String])
+munge s = (tests, code)
+  where (ls,prog) = splitString "\n\n\n\n" s
+        tests = splitEvery 14 . words $ cleanStr ls
+        code = lines prog
+
 problem1 :: String -> String
 problem1 s = show . length . filter (> 2) $ fmap (solve1 . parse) tests
-  where (ls,_) = splitString "\n\n\n\n" s
-        tests = splitEvery 14 . words $ cleanStr ls
+  where (tests, _) = munge s
+
+problem2 :: String -> String
+problem2 s = show . r0 . L.foldl solve2 newR $ code
+  where (_, c) = munge s
+        code   = fmap newI c
 
 main :: IO ()
-main = minteract [problem1]
+main = minteract [problem1, problem2]
 
 ----------------------------------------------------------------------
 
@@ -137,6 +184,9 @@ validate = runTests tests
 
                  , 4         ~=? get (R 4 3 2 1) 0
                  , R 4 3 2 0 ~=? set  reg R3 0
+
+                 , R 4 3 2 5 ~=? solve2 reg (I  1 1 2 R3) --  1 == addr
+                 , R 4 3 2 5 ~=? solve2 reg (I 13 1 2 R3) -- 13 == addi
 
                  , R 4 3 2 5 ~=? addr reg (I 42 1 2 R3)
                  , R 4 3 2 5 ~=? addi reg (I 42 1 2 R3)
