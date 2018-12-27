@@ -17,18 +17,12 @@ type Prim     = Int -> Int -> Int
 type Op       = Register -> Instruction -> Register
 
 -- NOTE: I'm not sold on Reg as a separate type yet.
-data Reg         = R0 | R1 | R2 | R3               deriving (Show, Eq, Ord)
+data Reg         = R0 | R1 | R2 | R3               deriving (Show, Eq, Ord, Enum)
 data Register    = R { r0, r1, r2, r3 :: Int }     deriving (Show, Eq, Ord)
 data Instruction = I { op, a, b :: Int, c :: Reg } deriving (Show, Eq)
 
 i2r :: Int -> Reg
-i2r n =
-  case n of
-    0 -> R0
-    1 -> R1
-    2 -> R2
-    3 -> R3
-    _ -> error "nope"
+i2r = toEnum
 
 get :: Register -> Int -> Int
 get R {..} c =                  -- Honestly, code like this seems dumb
@@ -59,22 +53,22 @@ upir r I {..} fn = set r c (a `fn` get r b)
 addr, addi, mulr, muli, banr, bani, borr, bori,
   setr, seti, gtir, gtri, gtrr, eqir, eqri, eqrr :: Op
 
-addr r o      = uprr r o (+)
-addi r o      = upri r o (+)
-mulr r o      = uprr r o (*)
-muli r o      = upri r o (*)
-banr r o      = uprr r o (.&.)
-bani r o      = upri r o (.&.)
-borr r o      = uprr r o (.|.)
-bori r o      = upri r o (.|.)
-setr r o      = uprr r o const
-seti r I {..} = set r c a
-gtir r o      = upir r o gti
-gtri r o      = upri r o gti
-gtrr r o      = uprr r o gti
-eqir r o      = upir r o eqi
-eqri r o      = upri r o eqi
-eqrr r o      = uprr r o eqi
+addr r o = uprr r o (+)
+addi r o = upri r o (+)
+mulr r o = uprr r o (*)
+muli r o = upri r o (*)
+banr r o = uprr r o (.&.)
+bani r o = upri r o (.&.)
+borr r o = uprr r o (.|.)
+bori r o = upri r o (.|.)
+setr r o = uprr r o const
+seti r o = set r (c o) (a o)
+gtir r o = upir r o gti
+gtri r o = upri r o gti
+gtrr r o = uprr r o gti
+eqir r o = upir r o eqi
+eqri r o = upri r o eqi
+eqrr r o = uprr r o eqi
 
 booli    :: Bool -> Int
 booli b   = if b then 1 else 0
