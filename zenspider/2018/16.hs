@@ -5,9 +5,6 @@ import Data.Char
 import Data.Bits
 import Utils (cleanStr, minteract, mmapBy, readi, splitEvery, splitString, xinteract)
 
-import qualified Data.List as L
-import qualified Data.Map as M
-
 -- for testing:
 import Test.HUnit
 import System.Environment (getEnv)
@@ -134,9 +131,6 @@ ins :: [Op]
 ins = [banr,addr,eqri,setr,gtrr,bori,gtir,seti,
        borr,bani,eqir,eqrr,gtri,addi,muli,mulr]
 
-solve2 :: Register -> Instruction -> Register
-solve2 r i = (ins L.!! op i) r i
-
 -- TODO: stupid name
 munge :: String -> ([[String]], [String])
 munge s = (tests, code)
@@ -149,9 +143,10 @@ problem1 s = show . length . filter (> 2) $ fmap (solve1 . parse) tests
   where (tests, _) = munge s
 
 problem2 :: String -> String
-problem2 s = show . r0 . L.foldl solve2 newR $ code
-  where (_, c) = munge s
-        code   = fmap newI c
+problem2 s = show . r0 . foldl exec newR $ code
+  where (_, c)   = munge s
+        code     = fmap newI c
+        exec r i = (ins !! op i) r i
 
 main :: IO ()
 main = minteract [problem1, problem2]
@@ -184,9 +179,6 @@ validate = runTests tests
 
                  , 4         ~=? get (R 4 3 2 1) 0
                  , R 4 3 2 0 ~=? set  reg R3 0
-
-                 , R 4 3 2 5 ~=? solve2 reg (I  1 1 2 R3) --  1 == addr
-                 , R 4 3 2 5 ~=? solve2 reg (I 13 1 2 R3) -- 13 == addi
 
                  , R 4 3 2 5 ~=? addr reg (I 42 1 2 R3)
                  , R 4 3 2 5 ~=? addi reg (I 42 1 2 R3)
