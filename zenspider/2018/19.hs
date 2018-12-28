@@ -22,13 +22,21 @@ newR :: Register
 newR = R 0 0 0 0 0 0 0
 
 parseInst :: [String] -> Instruction
-parseInst s = I op a b (toEnum c)
+parseInst s = I op a b (i2r c)
   where [op', a', b', c'] = s
         [a, b, c] = fmap readi [a', b', c']
         op = ops M.! op'
 
 i2r :: Int -> Reg
-i2r = toEnum
+i2r c =
+  case c of
+    0 -> R0
+    1 -> R1
+    2 -> R2
+    3 -> R3
+    4 -> R4
+    5 -> R5
+    _ -> error "nope!"
 
 get :: Register -> Reg -> Int
 get R {..} c =                  -- Honestly, code like this seems dumb
