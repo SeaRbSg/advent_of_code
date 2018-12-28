@@ -1,5 +1,4 @@
 {-# LANGUAGE RecordWildCards #-} -- for R {..} -> R { a=a, b=b ... }
-{-# OPTIONS_GHC -Wall -Wno-unused-top-binds -Wno-missing-signatures -Wno-name-shadowing -Wno-unused-imports -Wno-type-defaults #-}
 
 -- import Data.Char
 import Data.Bits ((.&.), (.|.))
@@ -8,9 +7,11 @@ import Utils
 -- import qualified Data.List as L
 import qualified Data.Map as M
 
+{-# ANN file' "HLint: ignore Defined but not used" #-}
+{-# ANN main' "HLint: ignore Defined but not used" #-}
+
 type Prim = Int -> Int -> Int
 type Op   = Register -> Instruction -> Register
-type PC   = Int
 
 -- -- NOTE: I'm not sold on Reg as a separate type yet.
 data Reg         = R0 | R1 | R2 | R3 | R4 | R5 deriving (Show, Eq, Ord, Enum)
@@ -108,19 +109,19 @@ ops = M.fromList [("addr", addr),
 exec :: Register -> Reg -> [Instruction] -> Register
 exec reg slot is = go reg
   where
-    max            = length is
-    updateSlot reg = set reg slot
-    updatePC   reg = reg { pc = get reg slot + 1 }
-    go reg         =
-      if pc' >= max
-        then reg
-        else let r   = updateSlot reg pc' -- copy PC to R0
-                 i   = is !! pc'          -- get instruction via pc
-                 r'  = op i r i           -- execute instructon
-                 r'' = updatePC r'        -- copy R0 to PC & increment PC
+    maxI         = length is
+    updateSlot r = set r slot
+    updatePC   r = r { pc = get r slot + 1 }
+    go r         =
+      if pc' >= maxI
+        then r
+        else let q   = updateSlot r pc' -- copy PC to R0
+                 i   = is !! pc'        -- get instruction via pc
+                 r'  = op i q i         -- execute instructon
+                 r'' = updatePC r'      -- copy R0 to PC & increment PC
               in go r''
       where
-        pc' = pc reg
+        pc' = pc r
 
 munge :: String -> (Int, [Instruction])
 munge s = (ip, is)
