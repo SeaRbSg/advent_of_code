@@ -103,6 +103,11 @@
   (for/list ([line (parse-lines in)])
     (string-split line)))
 
+(define (parse-lines-of-atoms in)
+  (define (string-or-symbol s) (or (string->number s) (string->symbol s)))
+  (for/list ([line (parse-lines in)])
+    (map string-or-symbol (string-split line))))
+
 (define (rotate lls)
   (groups-of 3 (transpose lls)))
 
