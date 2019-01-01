@@ -75,7 +75,7 @@
   (map (lambda (xs) (cons (f (first xs)) xs)) (group-by f l)))
 
 (define (groups-of n l)
-  (sequence->list (in-slice 3 (flatten l))))
+  (sequence->list (in-slice n (flatten l))))
 
 (define (nonemap f l)
   (not (ormap f l)))
