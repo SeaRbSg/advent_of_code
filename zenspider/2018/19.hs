@@ -152,7 +152,7 @@ problem2 s = show $ exec reg (i2r ip) is
     reg      = newR { r0 = 1 }
 
 main :: IO ()
-main = minteract [problem1, problem2]
+main = minteract [problem1]
 
 ----------------------------------------------------------------------
 
