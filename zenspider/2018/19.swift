@@ -1,56 +1,49 @@
-import Cocoa
+import Foundation
 
-typealias Reg  = Array<Int>
+let PC   = 6
+var slot = 0
+
+typealias Reg  = [Int]
 typealias Prim = (Int, Int) -> Int
 typealias Op   = (inout Reg, Inst) -> Void
 
 struct Inst {
-    var op : Op
+    var op: Op
     var a  = 0
     var b  = 0
     var c  = 0
 }
 
-var slot = 0
-
 func op_rr(fn : @escaping Prim) -> Op {
-    return { (r : inout Reg, i : Inst) -> Void in
-        r[i.c] = fn(r[i.a], r[i.b])
-    }
+    return { r, i in r[i.c] = fn(r[i.a], r[i.b]) }
 }
 
 func op_ri(fn : @escaping Prim) -> Op {
-    return { (r : inout Reg, i : Inst) -> Void in
-        r[i.c] = fn(r[i.a], i.b)
-    }
+    return { r, i in r[i.c] = fn(r[i.a], i.b) }
 }
 
 func op_ir(fn : @escaping Prim) -> Op {
-    return { (r : inout Reg, i : Inst) -> Void in
-        r[i.c] = fn(i.a, r[i.b])
-    }
+    return { r, i in r[i.c] = fn(i.a, r[i.b]) }
 }
 
-func op_r() -> (inout Reg, Inst) -> Void {
-    return { (r : inout Reg, i : Inst) -> Void in
-        r[i.c] = r[i.a]
-    }
+func op_r() -> Op {
+    return { r, i in r[i.c] = r[i.a] }
 }
 
-func op_i() -> (inout Reg, Inst) -> Void {
-    return { (r : inout Reg, i : Inst) -> Void in
-        r[i.c] = i.a
-    }
+func op_i() -> Op {
+    return { r, i in r[i.c] = i.a }
 }
 
-func b2i(test : Bool) -> Int {
+func b2i(test: Bool) -> Int {
     return test ? 1 : 0
 }
 
-let gti = { (a: Int, b: Int) in b2i(test:a > b) }
-let eqi = { (a: Int, b: Int) in b2i(test:a == b) }
+let nop: Op = { r, i in /* do nothing */ }
 
-let fns : [String: Op] = [
+let gti = { (a: Int, b: Int) in b2i(test: a > b) }
+let eqi = { (a: Int, b: Int) in b2i(test: a == b) }
+
+let fns: [String: Op] = [
     "addr": op_rr(fn: +),
     "addi": op_ri(fn: +),
     "mulr": op_rr(fn: *),
@@ -69,52 +62,44 @@ let fns : [String: Op] = [
     "eqrr": op_rr(fn: eqi),
 ]
 
-enum Token {
-    case slot(Int)
-    case n(Int)
-    case s(String)
-}
-
-func readFileLines(path: String) -> [String]? {
+func readFileLines(path: String) -> [String] {
     do {
-        let content = try String.init(contentsOfFile:path)
-        return content.components(separatedBy: "\n")
+        return try String(contentsOfFile: path).components(separatedBy: "\n")
     } catch {
-        return nil
+        return []
     }
 }
 
 func parse(path: String) -> [Inst] {
-    let lines = readFileLines(path:path)!
+    let lines = readFileLines(path: path)
 
-    return lines.compactMap { (str : String) -> Inst? in
+    return lines.compactMap { str in
         let words = str.components(separatedBy: " ")
 
-        if words.count == 2 {
-            guard let n = Int(words[1]) else { return nil }
-            slot = n
-            return nil
-        } else {
-            let op = fns[words[0]]
-
-            if op != nil {
-                let a  = Int(words[1])!
-                let b  = Int(words[2])!
-                let c  = Int(words[3])!
-
-                return Inst(op: op!, a:a, b:b, c:c)
-            } else {
+        switch words.count {
+        case 2:
+            guard let n = Int(words[1]) else {
                 return nil
             }
+            slot = n
+            return nil
+
+        case 4:
+            let op = fns[words[0]] ?? nop
+            let a  = Int(words[1]) ?? 0
+            let b  = Int(words[2]) ?? 0
+            let c  = Int(words[3]) ?? 0
+
+            return Inst(op: op, a: a, b: b, c: c)
+
+        default:
+            return nil
         }
     }
 }
 
-let PC = 6
-
-func exec(r : inout Reg, insts : Array<Inst>) -> Void {
-    let max = insts.count;
-
+func exec(r : inout Reg, insts: [Inst]) {
+    let max = insts.count
     repeat {
         let pc = r[PC]
         let i = insts[pc]
@@ -127,16 +112,20 @@ func exec(r : inout Reg, insts : Array<Inst>) -> Void {
     } while (r[PC] < max)
 }
 
-if CommandLine.arguments.count < 2 {
-    CommandLine.arguments.append("/Users/ryan/Work/git/searbsg/advent_of_code/zenspider/2018/19.txt")
+func run() {
+    if CommandLine.arguments.count < 2 {
+        CommandLine.arguments.append("/Users/ryan/Work/git/searbsg/advent_of_code/zenspider/2018/19.txt")
+    }
+
+    for path in CommandLine.arguments[1...] {
+        let insts = parse(path: path)
+
+        var r = [0, 0, 0, 0, 0, 0, 0]
+
+        exec(r: &r, insts: insts)
+
+        print(r)
+    }
 }
 
-for path in CommandLine.arguments[1...] {
-    let insts = parse(path: path)
-
-    var r = [0, 0, 0, 0, 0, 0, 0]
-
-    exec(r:&r, insts:insts)
-
-    print(r)
-}
+let _top: Void = run()
