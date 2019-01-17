@@ -1,8 +1,5 @@
 import Foundation
 
-let PC   = 6
-var slot = 0
-
 typealias Reg  = [Int]
 typealias Prim = (Int, Int) -> Int
 typealias Op   = (inout Reg, Inst) -> Void
@@ -21,13 +18,6 @@ func readFileLines(path: String) -> [String] {
     } catch {
         return []
     }
-}
-
-func handle_slot(_ s: String) {
-    guard let n = Int(s) else {
-        return
-    }
-    slot = n
 }
 
 let t = true
@@ -72,15 +62,16 @@ func handle_op(_ words: [String]) -> Inst {
     }
 }
 
-func parse(path: String) -> [Inst] {
+func parse(path: String) -> (Int, [Inst]) {
+    var slot = 0
     let lines = readFileLines(path: path)
 
-    return lines.compactMap { str in
+    let insts: [Inst] = lines.compactMap { str in
         let words = str.components(separatedBy: " ")
 
         switch words.count {
         case 2:
-            handle_slot(words[1])
+            slot = Int(words[1]) ?? 0
             return nil
 
         case 4:
@@ -90,12 +81,15 @@ func parse(path: String) -> [Inst] {
             return nil
         }
     }
+
+    return (slot, insts)
 }
 
-func exec(r: Reg, insts: [Inst]) -> Reg {
+func exec(r: Reg, insts: [Inst], slot: Int) -> Reg {
     var r = r // convert let to var... seems hacky
     let start = CFAbsoluteTimeGetCurrent()
     let max = insts.count
+    let PC = 6
 
     repeat {
         let pc = r[PC]
@@ -120,11 +114,12 @@ func run() {
         }
     }
 
-    for path in CommandLine.arguments[1...] {
-        let insts = parse(path: path)
+    let r  = [0, 0, 0, 0, 0, 0, 0]
 
-        let r  = [0, 0, 0, 0, 0, 0, 0]
-        let r2 = exec(r: r, insts: insts)
+    for path in CommandLine.arguments[1...] {
+        let (slot, insts) = parse(path: path)
+
+        let r2 = exec(r: r, insts: insts, slot: slot)
 
         print(r2)
     }
