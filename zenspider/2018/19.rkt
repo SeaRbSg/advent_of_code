@@ -11,6 +11,7 @@
 ;; reg struct -> vector                 = ~0ms (possibly -5ms)
 ;; inst struct -> vector                = ~0ms (~0.59s)
 ;; currying reg-[gs]etter               = ~150ms ? (~0.45s)
+;; removing `in` from new ops           = ~0ms (~0.45s)
 
 (define (inst op a b) (vector op a b))
 (define (inst-op i) (vector-ref i 0))
@@ -42,14 +43,14 @@
       (match (cons a/reg b/reg)
         ['(#t . #t) (let ([ga (reg-getter a)]
                           [gb (reg-getter b)])
-                      (λ (r in) (setter r (fn (ga r) (gb r)))))]
+                      (λ (r) (setter r (fn (ga r) (gb r)))))]
         ['(#t . #f) (let ([ga (reg-getter a)])
-                      (λ (r in) (setter r (fn (ga r) b))))]
+                      (λ (r) (setter r (fn (ga r) b))))]
         ['(#f . #t) (let ([gb (reg-getter b)])
-                      (λ (r in) (setter r (fn a      (gb r)))))]
+                      (λ (r) (setter r (fn a      (gb r)))))]
         ['(#t . no) (let ([ga (reg-getter a)])
-                      (λ (r in) (setter r     (ga r))))]
-        ['(#f . no)   (λ (r in) (setter r     a))]))
+                      (λ (r) (setter r     (ga r))))]
+        ['(#f . no)   (λ (r) (setter r     a))]))
     (inst wrapped-fn a b))
 
   (define-values (slot rest) (split-at (parse-lines-of-atoms s/f) 1))
@@ -86,7 +87,7 @@
     (if (< pc maxI)
         (let* ([i  (vector-ref insts pc)] ; get instruction via PC
                [r1 (updateSlot r pc)]     ; copy PC to <slot>
-               [r2 ((inst-op i) r1 i)]    ; execute instruction
+               [r2 ((inst-op i) r1)]      ; execute instruction
                [r3 (updatePC r2)])        ; copy <slot> + 1 to PC
           (go r3))
         r))
