@@ -61,12 +61,16 @@
   (for/sum ([line (parse-lines in)])
     (if (f line) 1 0)))
 
-(define-runtime-path INPUT (build-path (find-system-path 'orig-dir)
-                                       "input"))
+(define-runtime-path DIR (find-system-path 'orig-dir))
+;; TODO: Can't figure out how to use DIR at compile-time expansion
+(define-runtime-path INPUT (build-path (find-system-path 'orig-dir) "input"))
 
 (define (data-file n)
-  (build-path INPUT
-              (string-append (~0n n 2) ".txt")))
+  (define filename (string-append (~0n n 2) ".txt"))
+  (define f1 (build-path DIR   filename))
+  (define f2 (build-path INPUT filename))
+
+  (if (file-exists? f1) f1 f2))
 
 (define (flatmap f lst)
   (apply append (map f lst)))
@@ -98,6 +102,9 @@
 (define (parse-lines-of-numbers in)
   (for/list ([line (parse-lines in)])
     (map string->number (string-split line))))
+
+(define (parse-numbers in)
+  (flatten (parse-lines-of-numbers in)))
 
 (define (parse-lines-of-words in)
   (for/list ([line (parse-lines in)])
