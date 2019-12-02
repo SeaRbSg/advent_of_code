@@ -10,6 +10,8 @@
          racket/sequence
          racket/string)
 
+(require (only-in racket/unsafe/undefined [unsafe-undefined none]))
+
 (provide (all-defined-out))
 
 (module+ test
@@ -99,12 +101,12 @@
 (define (parse-lines in)
   (port->lines (->port in)))
 
-(define (parse-lines-of-numbers in)
+(define (parse-lines-of-numbers in [sep none])
   (for/list ([line (parse-lines in)])
-    (map string->number (string-split line))))
+    (map string->number (string-split line sep))))
 
-(define (parse-numbers in)
-  (flatten (parse-lines-of-numbers in)))
+(define (parse-numbers in [sep none])
+  (flatten (parse-lines-of-numbers in sep)))
 
 (define (parse-lines-of-words in)
   (for/list ([line (parse-lines in)])
