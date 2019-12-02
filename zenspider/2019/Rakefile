@@ -23,6 +23,12 @@ directory "input"
   task :download => desc_path
   task :template => [ruby_path, rack_path]
 
+  task "input#{day_s}" => :input do
+    src = File.expand_path("~/Downloads/input.txt")
+    dst = "input/#{day_s}.txt"
+    mv src, dst
+  end
+
   task "test:#{day_s}" => ["test:#{day_s}:rb", "test:#{day_s}:rkt"]
 
   file desc_path => "desc" do

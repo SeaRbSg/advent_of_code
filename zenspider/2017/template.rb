@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby -w
 
+require "../2017/utils.rb"
+
 # DESCRIPTION
 
 class ProblemNNa
