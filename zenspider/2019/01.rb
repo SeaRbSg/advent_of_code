@@ -13,6 +13,11 @@ class Problem01a
 end
 
 class Problem01b < Problem01a
+  def fuel mass
+    f = (mass / 3).floor - 2
+
+    f > 0 ? f + fuel(f) : 0
+  end
 end
 
 if ARGV.empty? then
@@ -38,7 +43,12 @@ if ARGV.empty? then
     end
 
     def test_b
-      skip
+      x = Problem01b.new
+
+      assert_equal 2,     x.fuel(12)
+      assert_equal 2,     x.fuel(14)
+      assert_equal 966,   x.fuel(1969)
+      assert_equal 50346, x.fuel(100756)
     end
   end
 else
