@@ -42,22 +42,47 @@
 (module+ test
   (require rackunit))
 
+(define (fuel mass)
+  (- (floor (/ mass 3)) 2))
+
 (define (problem-01a input)
-  #f)
+  (for/sum ([mass (in-list input)])
+    (fuel mass)))
 
 (module+ test
-  (check-equal? (problem-01a "123") 3))
+  (check-equal? (fuel 12)     2)
+  (check-equal? (fuel 14)     2)
+  (check-equal? (fuel 1969)   654)
+  (check-equal? (fuel 100756) 33583)
+
+  (define input (parse-numbers (->port "12\n14\n1969\n100756\n")))
+
+  (check-equal? (problem-01a input)
+                (+ 2 2 654 33583)))
+
+(define (fuel/b mass)
+  (let ([f (- (floor (/ mass 3)) 2)])
+    (if (> f 0)
+        (+ f (fuel/b f))
+        0)))
 
 (define (problem-01b input)
-  #f)
+  (for/sum ([mass (in-list input)])
+    (fuel/b mass)))
 
 (module+ test
-  (check-equal? (problem-01b "123") 6))
+  (check-equal? (fuel/b 12)     2)
+  (check-equal? (fuel/b 14)     2)
+  (check-equal? (fuel/b 1969)   966)
+  (check-equal? (fuel/b 100756) 50346)
+
+  (check-equal? (problem-01b input)
+                (+ 2 2 966 50346)))
 
 (module+ test
   (displayln 'done))
 
 (module+ main
-  (define input (parse-file (data-file 01)))
+  (define input (parse-numbers (data-file 01)))
   (problem-01a input)
   (problem-01b input))
