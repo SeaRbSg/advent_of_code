@@ -1,0 +1,80 @@
+task :prof do
+  sh "X=1 time ghc -O2 -prof -fprof-auto -rtsopts -fexternal-interpreter 19.hs && X=1 time ./19 +RTS -P < 19.txt"
+end
+
+task :racket do
+  rm_rf "compiled"
+  sh "X=1 time racket 19.rkt 19.txt"
+  sh "raco make -v 19.rkt &> /dev/null"
+  puts "versus:"
+  sh "X=1 time racket 19.rkt 19.txt"
+end
+
+task :fast do
+  sh "X=1 time ghc --make -O2 19.hs && X=1 time ./19 < 19.txt"
+end
+
+task :haskell do
+  sh "X=1 time runhaskell ./19.hs < 19.txt"
+  sh "ghc --make -O2 19.hs &> /dev/null"
+  puts "versus:"
+  sh "X=1 time ./19 < 19.txt"
+end
+
+task :core do
+  sh "ghc -O0 -dsuppress-all -dsuppress-uniques -ddump-simpl -c Utils.hs 19.hs > 19.core.hs"
+end
+
+file "helpers.swiftmodule" => "helpers.swift" do
+  rm_f "helpers.swiftmodule"
+  rm_f "helpers.dylib"
+  sh "swiftc -emit-library -emit-module -module-link-name helpers helpers.swift"
+end
+
+task :swift=> "helpers.swiftmodule"
+
+task "01" => "helpers.swiftmodule" do
+  sh "./01.swift < 01.txt"
+end
+
+file "day19" => "19.swift" do
+  sh "swiftc -O -o day19 19.swift"
+end
+
+# task :swift => "day19" do
+#   sh "X=1 time swift -O 19.swift 19.txt"
+#   puts "versus:"
+#   sh "X=1 time ./day19 19.txt"
+# end
+
+task :compare do
+  sh %(git stash &> /dev/null; X=1 time swift -O 19.swift | pgrep 'Took ([\\d\\.]+)' | avg; echo; echo versus; echo; git stash pop &> /dev/null; X=1 time swift -O 19.swift | pgrep 'Took ([\\d\\.]+)' | avg)
+end
+
+# export TIMEFORMAT="%3R real"
+# for SHA in $(git rev-list --abbrev-commit --all --reverse  -- 19.swift); do
+#   echo -n "$SHA: "
+#   STFU git checkout $SHA
+#   time STFU swift -O 19.swift $(jot -b 19.txt -s " " 100 )
+# done
+
+# d27d821: 35.316 real # original version -- port of racket
+# 1d7f599: 35.116 real # cleaned up now that it works, no real diff
+# 8687ec2: 16.976 real # compiled in direct index access for ops
+# 6b4b6fb: 16.941 real # minor tweaks to improve overall design (eg no globals)
+# 4a1734e: 14.171 real # array of ints -> struct w/ subscript accessors
+
+task :all do
+  sh %(for SHA in $(git rev-list --all --reverse  -- 19.swift); do git checkout $SHA &> /dev/null; X=1 time swift -O 19.swift $(jot -b 19.txt -s " " 100 ) | pgrep 'Took ([\d\.]+)' | avg; done)
+end
+
+task :clean do
+  rm_f Dir["*~", "*.hi", "*.o", "*.prof", "day19", "compiled", "*.swiftdoc", "*.swiftmodule", "*.dylib"]
+end
+
+task :wtf do
+  sh "X=1 time ghc -O -rtsopts --make -prof -fprof-auto -fexternal-interpreter 19.hs"
+  sh "X=1 time ./19 +RTS -hc -p < 19.txt"
+  sh "hp2ps -c 19.hp"
+  sh "open 19.ps"
+end
