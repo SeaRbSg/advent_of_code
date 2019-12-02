@@ -6,7 +6,7 @@ Isolate.now! do
   gem "loofah"
 end
 
-days = Time.now.day
+days = (Time.now + (3 * 3600)).day
 
 task :default  => [:download, :template]
 
