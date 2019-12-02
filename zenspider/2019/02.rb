@@ -97,7 +97,38 @@ require "../2017/utils.rb"
 # halts?
 
 class Problem02a
-  def run input
+  attr_accessor :ops
+  attr_accessor :pos
+
+  def initialize input
+    self.ops = input.integers
+    self.pos = 0
+  end
+
+  def run
+    pos = 0
+
+    loop do
+      op, a, b, dst = ops[pos, 4]
+
+      case op
+      when 1 then
+        n1  = ops[a]
+        n2  = ops[b]
+
+        ops[dst] = n1 + n2
+      when 2 then
+        n1  = ops[a]
+        n2  = ops[b]
+
+        ops[dst] = n1 * n2
+      when 99 then
+        break
+      end
+      pos += 4
+    end
+
+    ops
   end
 end
 
@@ -108,8 +139,28 @@ if ARGV.empty? then
   require "minitest/autorun"
 
   class Test02 < Minitest::Test
+    def go input
+      Problem02a.new(input).run
+    end
+
     def test_a
-      flunk
+
+      input = "1,0,0,0,99"
+      assert_equal "2,0,0,0,99".integers, go(input)
+
+      input = "2,3,0,3,99"
+      assert_equal "2,3,0,_6_,99".integers, go(input)
+
+      input = "2,4,4,5,99,0"
+      assert_equal "2,4,4,5,99,_9801_".integers, go(input)
+
+      input = "1,1,1,4,99,5,6,0,99"
+      assert_equal "_30_,1,1,4,_2_,5,6,0,99".integers, go(input)
+
+      input = "1,9,10,3,2,3,11,0,99,30,40,50"
+      exp   = "3500,9,10,70, 2,3,11,0, 99, 30,40,50"
+
+      assert_equal exp.integers, go(input)
     end
 
     def test_b
@@ -118,6 +169,11 @@ if ARGV.empty? then
   end
 else
   input = ARGF.read.chomp
-  p Problem02a.new.run input
-  p Problem02b.new.run input
+
+  cpu = Problem02a.new(input)
+  cpu.ops[1] = 12
+  cpu.ops[2] = 2
+  p cpu.run.first
+
+  p Problem02b.new(input).run.first
 end
