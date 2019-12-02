@@ -1,0 +1,176 @@
+#!/usr/bin/env ruby -w
+
+require "isolate"
+
+Isolate.now! do
+  gem "loofah"
+end
+
+days = Time.now.day
+
+task :default  => [:download, :template]
+
+directory "desc"
+directory "input"
+
+(1..days).each do |day|
+  day_s = "%02d" % day
+
+  desc_path = "desc/#{day_s}.txt"
+  ruby_path = "#{day_s}.rb"
+  rack_path = "#{day_s}.rkt"
+
+  task :download => desc_path
+  task :template => [ruby_path, rack_path]
+
+  task "test:#{day_s}" => ["test:#{day_s}:rb", "test:#{day_s}:rkt"]
+
+  file desc_path => "desc" do
+    Worker.problem desc_path, day
+  end
+
+  file ruby_path => desc_path do
+    Worker.template "../2017/template.rb", desc_path, ruby_path, day
+  end
+
+  file rack_path => desc_path do
+    Worker.template "../2017/template.rkt", desc_path, rack_path, day
+  end
+
+  desc "Run #{day_s} ruby"
+  task "test:#{day_s}:rb" do
+    sh "time minitest #{day_s}.rb"
+  end
+
+  desc "Run #{day_s} racket"
+  task "test:#{day_s}:rkt" do
+    sh "time raco test --direct #{day_s}.rkt"
+  end
+end
+
+task :test => ["test:ruby", "test:racket"]
+
+namespace :test do
+  task :ruby do
+    sh "time minitest [0-9]*.rb"
+  end
+
+  task :racket do
+    sh "time raco test --direct [0-9]*.rkt"
+  end
+end
+
+task :clean do
+  rm_f Dir["*~", "*.hi"]
+end
+
+############################################################
+
+require "open-uri"
+require "loofah"
+require "rdoc/text"
+
+module Worker
+  BASE = "https://adventofcode.com/#{Time.now.year}/day"
+
+  def self.clean str
+    Loofah.fragment(str).scrub!(ToMarkdown.new).to_text.strip
+  end
+
+  def self.problem path, day
+    warn "Downloading #{path}"
+
+    uri  = "#{BASE}/#{day}"
+    str  = URI.parse(uri).read[%r%<article.*</article>%m]
+    body = clean str
+
+    File.open path, "w" do |f|
+      f.puts body
+    end
+  end
+
+  def self.template template_path, desc_path, output_path, day
+    warn output_path
+
+    day_s = "%02d" % day
+    desc  = File.read desc_path
+    file  = File.read(template_path)
+      .gsub(/NN/, day_s)
+      .sub(/^(.+)DESCRIPTION/) { desc.gsub(/^/, $1).strip }
+      .gsub(/ +$/, "")
+
+    File.write output_path, file
+  end
+end
+
+class ToMarkdown < Loofah::Scrubber
+  include RDoc::Text
+
+  def initialize
+    @direction = :bottom_up
+    @link_reference_count = 0
+  end
+
+  def scrub(node)
+    return CONTINUE if node.text?
+
+    new_node =
+      case node.name
+      when "h1"
+        new_text node, "# #{node.content}\n\n"
+      when "h2"
+        new_text node, "## #{node.content}\n\n"
+        # when "h3"
+        #   new_text node, "\n### #{node.content}\n"
+        # when "h4"
+        #   new_text node, "\n#### #{node.content}\n"
+        # when "blockquote"
+        #   fragment = node.inner_html
+        #   fragment.gsub!(/\n(.)/, "\n&gt; \\1")
+        #   node.document.fragment(fragment)
+      when "li"
+        nil # handled by parent list tag
+      when "ul"
+        fragment = node.xpath("./li").map { |li|
+          "* #{wrap(li.text).gsub(/^/, "  ").strip}"
+        }
+        new_text node, "\n#{fragment.join("\n")}\n"
+        # when "ol"
+        #   fragment = []
+        #   node.xpath("./li").each_with_index do |li, j|
+        #     fragment << "#{j+1}. #{li.text}" if li.text =~ /\S/
+        #   end
+        #   new_text node, "\n#{fragment.join("\n")}\n"
+      when "code" then
+        new_text node, "`#{node.content}`"
+      when "em"
+        new_text node, "_#{node.content}_"
+      when "br"
+        new_text node, "\n"
+      when "span"
+        title =  node["title"]
+        new_text node, "_#{node.content}_ ((#{title}))" if title
+      when "p"
+        text = node.content.split(/\n\n+/).map { |s| wrap s }.join("\n\n")
+        new_text node, "\n#{text}\n"
+        # when "a"
+        #   new_text node, "[#{node.text}](#{node['href']})"
+      else
+        if Loofah::Elements::BLOCK_LEVEL.include? node.name
+          new_text node, "\n#{node.content}\n"
+        else
+          warn "WARNING! UNHANDLED: #{node.name}: #{node.text}"
+          nil
+        end
+      end
+
+    if new_node
+      node.add_next_sibling new_node
+      node.remove
+    end
+  end
+
+  def new_text(node, text)
+    Nokogiri::XML::Text.new(text, node.document)
+  end
+end

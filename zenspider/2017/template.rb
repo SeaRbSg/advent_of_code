@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby -w
 
+# DESCRIPTION
+
 class ProblemNNa
   def run input
   end
