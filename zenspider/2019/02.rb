@@ -105,9 +105,13 @@ class Problem02a
     self.pos = 0
   end
 
-  def run
-    pos = 0
+  def seed noun, verb
+    self.pos = 0
+    ops[1] = noun
+    ops[2] = verb
+  end
 
+  def execute
     loop do
       op, a, b, dst = ops[pos, 4]
 
@@ -125,55 +129,63 @@ class Problem02a
       when 99 then
         break
       end
-      pos += 4
+      self.pos += 4
     end
 
     ops
   end
+
+  def run
+    execute
+  end
 end
 
 class Problem02b < Problem02a
+  def run
+    backup = ops.dup
+
+    (1..99).each do |noun|
+      (1..99).each do |verb|
+        self.ops = backup.dup
+        self.seed noun, verb
+
+        result = execute.first
+
+        return noun*100 + verb if result == 19690720
+      end
+    end
+
+    raise "bad"
+  end
 end
 
 if ARGV.empty? then
   require "minitest/autorun"
 
   class Test02 < Minitest::Test
-    def go input
-      Problem02a.new(input).run
+    def assert_execute exp, inp
+      assert_equal exp.integers, Problem02a.new(inp).run
     end
 
     def test_a
-
-      input = "1,0,0,0,99"
-      assert_equal "2,0,0,0,99".integers, go(input)
-
-      input = "2,3,0,3,99"
-      assert_equal "2,3,0,_6_,99".integers, go(input)
-
-      input = "2,4,4,5,99,0"
-      assert_equal "2,4,4,5,99,_9801_".integers, go(input)
-
-      input = "1,1,1,4,99,5,6,0,99"
-      assert_equal "_30_,1,1,4,_2_,5,6,0,99".integers, go(input)
-
-      input = "1,9,10,3,2,3,11,0,99,30,40,50"
-      exp   = "3500,9,10,70, 2,3,11,0, 99, 30,40,50"
-
-      assert_equal exp.integers, go(input)
+      assert_execute "2,0,0,0,99", "1,0,0,0,99"
+      assert_execute "2,3,0,_6_,99", "2,3,0,3,99"
+      assert_execute "2,4,4,5,99,_9801_", "2,4,4,5,99,0"
+      assert_execute "_30_,1,1,4,_2_,5,6,0,99", "1,1,1,4,99,5,6,0,99"
+      assert_execute("3500,9,10,70,2,3,11,0,99,30,40,50",
+                     "1,9,10,3,2,3,11,0,99,30,40,50")
     end
 
     def test_b
-      skip
+      # nothing to do
     end
   end
 else
   input = ARGF.read.chomp
 
   cpu = Problem02a.new(input)
-  cpu.ops[1] = 12
-  cpu.ops[2] = 2
+  cpu.seed 12, 2
   p cpu.run.first
 
-  p Problem02b.new(input).run.first
+  p Problem02b.new(input).run
 end
