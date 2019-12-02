@@ -13,6 +13,8 @@ task :default  => [:download, :template]
 directory "desc"
 directory "input"
 
+day_s = nil
+
 (1..days).each do |day|
   day_s = "%02d" % day
 
@@ -52,6 +54,10 @@ directory "input"
   task "test:#{day_s}:rkt" do
     sh "time raco test --direct #{day_s}.rkt"
   end
+end
+
+task :run do
+  sh "ruby ./#{day_s}.rb input/#{day_s}.txt"
 end
 
 task :test => ["test:ruby", "test:racket"]
