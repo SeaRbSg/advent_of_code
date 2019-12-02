@@ -1,1 +1,6 @@
-template.rb
+*~
+tmp
+*.swiftdoc
+*.swiftmodule
+*.gz
+*.dylib
