@@ -4,21 +4,18 @@
          racket/string
          "myutils.rkt")
 
-(define directions (parse-file (data-file 1)))
+(define (parse in)
+  (parse-words in ", "))
+
+(define directions (parse (data-file 1)))
 
 (define dirs  '([N . E] [E . S] [S . W] [W . N]))
 (define rdirs '([E . N] [S . E] [W . S] [N . W]))
 
-(define (split directions)
-  (string-split directions ", "))
-
-(define (convert directions)
-  (split directions))
-
 (define (distance-to directions)
   (define-values (d x y)
    (for/fold ([d 'N] [x 0] [y 0])
-             ([inst (convert directions)])
+             ([inst (in-list directions)])
      (define-regexp (m (app string->number n)) #rx"(R|L)([0-9]+)" inst)
      (match-let* ([nd (match m
                         ["R" (cdr (assoc d dirs))]
@@ -35,9 +32,12 @@
 (module+ test
   (require rackunit)
 
-  (check-equal? (distance-to "R2, L3") 5)
-  (check-equal? (distance-to "R2, R2, R2") 2)
-  (check-equal? (distance-to "R5, L5, R5, R3") 12)
-
-  (check-equal? (distance-to directions) 243)
-  )
+  (check-equal? (distance-to (parse "R2, L3"))
+                5)
+  (check-equal? (distance-to (parse "R2, R2, R2"))
+                2)
+  (check-equal? (distance-to (parse "R5, L5, R5, R3"))
+                12)
+  (check-equal? (distance-to directions)
+                243)
+  (displayln 'done))

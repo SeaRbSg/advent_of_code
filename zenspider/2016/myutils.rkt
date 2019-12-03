@@ -122,6 +122,9 @@
   (for/list ([line (parse-lines in)])
     (string-split line sep)))
 
+(define (parse-words in [sep none])
+  (flatten (parse-lines-of-words in sep)))
+
 (define (parse-lines-of-atoms in [sep none])
   (define (string-or-symbol s) (or (string->number s) (string->symbol s)))
   (for/list ([line (parse-lines in)])
