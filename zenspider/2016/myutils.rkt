@@ -18,6 +18,9 @@
 (module+ test
   (require rackunit))
 
+(define (flatten/1 lists)
+  (apply append lists))
+
 (define-syntax-rule (define-list (pat ...) expr)
   (match-define (list pat ...) expr))
 

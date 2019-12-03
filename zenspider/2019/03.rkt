@@ -8,21 +8,20 @@
 (define (parse input)
   (for/list ([line (parse-lines-of-words input ",")])
     (for/list ([ins (in-list line)])
-      (match ins
-        [(pregexp #px"R(\\d+)" (list _ num)) (list (+ (string->number num)) 0)]
-        [(pregexp #px"L(\\d+)" (list _ num)) (list (- (string->number num)) 0)]
-        [(pregexp #px"U(\\d+)" (list _ num)) (list 0 (+ (string->number num)))]
-        [(pregexp #px"D(\\d+)" (list _ num)) (list 0 (- (string->number num)))]
-        [_ #f]))))
+      (define-regexp (dir (app string->number n)) #px"([UDLR])([0-9]+)" ins)
+      (match dir
+        ["R" (list (+ n)    0)]
+        ["L" (list (- n)    0)]
+        ["U" (list    0  (+ n))]
+        ["D" (list    0  (- n))]))))
 
 (define (expand coords)
   (for/list ([line (in-list coords)])
-    (apply append
+    (flatten/1
      (for/list ([coord (in-list line)])
        (match coord
          [(list x 0) (make-list (abs x) (list (* (sgn x) 1) 0))]
-         [(list 0 y) (make-list (abs y) (list 0 (* (sgn y) 1)))]
-         [_ #f])))))
+         [(list 0 y) (make-list (abs y) (list 0 (* (sgn y) 1)))])))))
 
 (define (walk coords)
   (for/list ([line (in-list coords)])
@@ -37,8 +36,8 @@
         (cons (list (+ x dx) (+ y dy)) acc)))))
 
 (define (problem-03a input)
-  (define walks (walk (expand (parse input))))
-  (for/list/min ([xy (in-list (apply list-intersect walks))])
+  (define-list (walk-a walk-b) (walk (expand (parse input))))
+  (for/list/min ([xy (in-list (list-intersect walk-a walk-b))])
     (+ (abs (first xy))
        (abs (second xy)))))
 
@@ -83,7 +82,8 @@
        (add1 (index-of line-b coord)))))
 
 (define (problem-03b input)
-  (apply sum-steps (walk (expand (parse input)))))
+  (define-list (walk-a walk-b) (walk (expand (parse input))))
+  (sum-steps walk-a walk-b))
 
 (module+ test
   (check-equal? (problem-03b input1)
