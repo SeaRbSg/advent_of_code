@@ -8,6 +8,7 @@
          racket/port
          racket/runtime-path
          racket/sequence
+         racket/set
          racket/string)
 
 (require (only-in racket/unsafe/undefined [unsafe-undefined none]))
@@ -28,6 +29,9 @@
 
 (define-syntax-rule (for/list/flat body ...)
   (flatten (for/list body ...)))
+
+(define-syntax-rule (for/list/min body ...)
+  (apply min (for/list body ...)))
 
 (define-syntax-rule (for/all  body ...) (for/and body ...))
 (define-syntax-rule (for/none body ...) (not (for/or body ...)))
@@ -90,6 +94,9 @@
   (sort (group-by-map length (group-by identity l))
         (lambda (a b) (< (first b) (first a)))))
 
+(define (list-intersect . xss)
+  (set->list (apply set-intersect (map list->set xss))))
+
 (define (->port in)
   (cond [(input-port? in) in]
         [(file-exists? in) (open-input-file in)]
@@ -108,14 +115,14 @@
 (define (parse-numbers in [sep none])
   (flatten (parse-lines-of-numbers in sep)))
 
-(define (parse-lines-of-words in)
+(define (parse-lines-of-words in [sep none])
   (for/list ([line (parse-lines in)])
-    (string-split line)))
+    (string-split line sep)))
 
-(define (parse-lines-of-atoms in)
+(define (parse-lines-of-atoms in [sep none])
   (define (string-or-symbol s) (or (string->number s) (string->symbol s)))
   (for/list ([line (parse-lines in)])
-    (map string-or-symbol (string-split line))))
+    (map string-or-symbol (string-split line sep))))
 
 (define (rotate lls)
   (groups-of 3 (transpose lls)))
