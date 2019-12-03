@@ -38,6 +38,22 @@ class Problem03a
 end
 
 class Problem03b < Problem03a
+  def steps line_a, line_b
+    overlap = line_a & line_b
+
+    overlap.map { |coord|
+      [line_a.index(coord)+1, line_b.index(coord)+1].sum
+    }.min
+  end
+
+  def run input
+    line_a, line_b = parse input
+
+    line_a = walk line_a
+    line_b = walk line_b
+
+    steps line_a, line_b
+  end
 end
 
 if ARGV.empty? then
@@ -84,16 +100,21 @@ if ARGV.empty? then
       assert_equal 6, Problem03a.new.run(INPUT)
     end
 
+    INPUT2 = "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83"
+    INPUT3 = "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7"
+
     def test_run_a_2
-      assert_equal 159, Problem03a.new.run("R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83")
+      assert_equal 159, Problem03a.new.run(INPUT2)
     end
 
     def test_run_a_3
-      assert_equal 135, Problem03a.new.run("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7")
+      assert_equal 135, Problem03a.new.run(INPUT3)
     end
 
     def test_b
-      skip
+      assert_equal  30, Problem03b.new.run(INPUT)
+      assert_equal 610, Problem03b.new.run(INPUT2)
+      assert_equal 410, Problem03b.new.run(INPUT3)
     end
   end
 else
