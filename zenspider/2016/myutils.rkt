@@ -55,10 +55,22 @@
              (lambda (xs) (pair? (drop xs (sub1 n))))
              #f #f))))
 
-(define char->number (compose string->number list->string list))
+(define char->number
+  (let ([zero (char->integer #\0)])
+    (λ (c) (- (char->integer c) zero))))
 
 (module+ test
   (check-equal? (char->number #\3) 3))
+
+(define (number->digits num [base 10])
+  (let loop ([num    num]
+             [result null])
+    (if (zero? num) result
+        (loop (quotient num base)
+              (cons (remainder num base) result)))))
+
+(module+ test
+  (check-equal? (number->digits 1234567890) '(1 2 3 4 5 6 7 8 9 0)))
 
 (define (string->digits s)
   (map char->number (string->list s)))
