@@ -1,6 +1,8 @@
-#lang racket
+#lang racket/base
 
-(require "../2016/myutils.rkt")
+(require racket/function
+         racket/list
+         "../2016/myutils.rkt")
 
 (module+ test
   (require rackunit))
@@ -13,19 +15,19 @@
    (equal? ds (sort ds <))))            ; sort and compare (O(log n) + O(n))
 
 (define (crack/1b n)
-  (for/fold ([dup #f]
-             [asc #t]
+  (for/fold ([dup #f]                   ; use fold to do all at once
+             [asc #t]                   ; ascending and duplicate checking
              [last -1]
              #:result (and dup asc))
-            ([n (in-list (number->digits n))])
+            ([n (in-list (number->digits n))]) ; still extracting digits
     (values (or  dup (= n last))
             (and asc (<= last n))
             n)))
 
 (define (crack/1c n)
-  (let loop ([num   n]
-             [dup  #f]
-             [dec  #t]
+  (let loop ([num   n]                  ; use let loop to extract digits
+             [dup  #f]                  ; and do descending and duplicate checks
+             [dec  #t]                  ; descending because left to right
              [last 99])
     (if (zero? num)
         (and dup dec)
@@ -38,17 +40,17 @@
 
 (define (crack/1d n)
   (let loop ([num   n]
+             [last 99]
              [dup  #f]
-             [dec  #t]
-             [last 99])
-    (if (or (zero? num) (not dec))
+             [dec  #t])
+    (if (or (zero? num) (not dec))      ; short circuit if ever ascending
         (and dup dec)
         (let ([m (quotient num 10)]
               [n (remainder num 10)])
           (loop m
-                (or  dup (= n last))
-                (and dec (<= n last))
-                n)))))
+                n
+                (or  dup (=  n last))
+                (and dec (<= n last)))))))
 
 (define crack crack/1d)
 
