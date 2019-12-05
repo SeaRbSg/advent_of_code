@@ -2,7 +2,6 @@
 
 require "../2017/utils.rb"
 
-
 class IntCode
   attr_accessor :mem
   attr_accessor :pos
@@ -18,79 +17,79 @@ class IntCode
     self.done    = false
   end
 
+  def arg1 ma
+    a, = mem[pos+1, 1]
+
+    n1 = a # HACK always position mode?
+
+    self.pos += 2
+
+    n1
+  end
+
+  def arg2 ma, mb
+    a, b = mem[pos+1, 2]
+
+    n1 = ma == "0" ? mem[a] : a
+    n2 = mb == "0" ? mem[b] : b
+
+    self.pos += 3
+
+    [n1, n2]
+  end
+
+  def arg3 ma, mb, mc
+    a, b, c = mem[pos+1, 3]
+
+    n1 = ma == "0" ? mem[a] : a
+    n2 = mb == "0" ? mem[b] : b
+    n3 = c
+
+    self.pos += 4
+
+    [n1, n2, n3]
+  end
+
   def step
     inst = "%05d" % mem[pos]
 
-    _mc, mb, ma, op = inst[0], inst[1], inst[2], inst[3..4]
+    mc, mb, ma, op = inst[0], inst[1], inst[2], inst[3..4]
 
     case op
     when "99" then # HALT
       self.done = true
     when "01" then # ADD
-      a, b, c = mem[pos+1, 3]
-
-      n1 = ma == "0" ? mem[a] : a
-      n2 = mb == "0" ? mem[b] : b
-      n3 = c
+      n1, n2, n3 = arg3 ma, mb, mc
 
       mem[n3] = n1 + n2
-
-      self.pos += 4
     when "02" then # MUL
-      a, b, c = mem[pos+1, 3]
-
-      n1 = ma == "0" ? mem[a] : a
-      n2 = mb == "0" ? mem[b] : b
-      n3 = c
+      n1, n2, n3 = arg3 ma, mb, mc
 
       mem[n3] = n1 * n2
-
-      self.pos += 4
     when "03" then # READ
-      a, = mem[pos+1, 1]
+      n1 = arg1 ma
 
-      mem[a] = input.shift
-
-      self.pos += 2
+      mem[n1] = input.shift
     when "04" then # WRITE
-      a, = mem[pos+1, 1]
+      n1 = arg1 ma
 
-      output << mem[a]
-
-      self.pos += 2
+      output << mem[n1]
     when "05" then # JTRUE
-      a, b = mem[pos+1, 2]
+      n1, n2 = arg2 ma, mb
 
-      n1 = ma == "0" ? mem[a] : a
-      n2 = mb == "0" ? mem[b] : b
-
-      self.pos = n1.zero? ? pos + 3 : n2
+      self.pos = n2 unless n1.zero?
     when "06" then # JFALSE
-      a, b = mem[pos+1, 2]
+      n1, n2 = arg2 ma, mb
 
-      n1 = ma == "0" ? mem[a] : a
-      n2 = mb == "0" ? mem[b] : b
-
-      self.pos = n1.zero? ? n2 : pos + 3
+      self.pos = n2 if n1.zero?
     when "07" then # LT
-      a, b, c = mem[pos+1, 3]
-
-      n1 = ma == "0" ? mem[a] : a
-      n2 = mb == "0" ? mem[b] : b
-      n3 = c
+      n1, n2, n3 = arg3 ma, mb, mc
 
       mem[n3] = n1 < n2 ? 1 : 0
-
-      self.pos += 4
     when "08" then # EQ
-      a, b, c = mem[pos+1, 3]
-
-      n1 = ma == "0" ? mem[a] : a
-      n2 = mb == "0" ? mem[b] : b
-      n3 = c
+      n1, n2, n3 = arg3 ma, mb, mc
 
       mem[n3] = n1 == n2 ? 1 : 0
-      self.pos += 4
     else
       abort "BAD OP!: #{inst}"
     end
@@ -106,7 +105,7 @@ class Problem05a
     int = IntCode.new input
     int.input << 1
     int.run
-    puts int.output
+    int.output
   end
 end
 
@@ -115,7 +114,7 @@ class Problem05b < Problem05a
     int = IntCode.new input
     int.input << 5
     int.run
-    puts int.output
+    int.output
   end
 end
 
@@ -150,7 +149,7 @@ if ARGV.empty? then
   end
 else
   input = ARGF.read.chomp
-  p Problem05a.new.run input
+  puts Problem05a.new.run input
   puts
-  p Problem05b.new.run input
+  puts Problem05b.new.run input
 end
