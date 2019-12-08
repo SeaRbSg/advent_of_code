@@ -13,8 +13,6 @@ task :default  => [:download, :template]
 directory "desc"
 directory "input"
 
-day_s = nil
-
 (1..days).each do |day|
   day_s = "%02d" % day
 
