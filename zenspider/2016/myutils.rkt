@@ -15,6 +15,10 @@
 
 (provide (all-defined-out))
 
+;; (require syntax/parse/define)
+;; (define-simple-macro (dbg fmt arg ...) (printf fmt arg ...))
+;; (define-simple-macro (dbg fmt arg ...) (void))
+
 (module+ test
   (require rackunit))
 
@@ -71,6 +75,13 @@
 
 (module+ test
   (check-equal? (number->digits 1234567890) '(1 2 3 4 5 6 7 8 9 0)))
+
+(define (b->i b) (if b 1 0))
+
+(module+ test
+  (check-equal? (b->i (eq? 1 2)) 0)
+  (check-equal? (b->i (eq? 1 1)) 1))
+
 
 (define (string->digits s)
   (map char->number (string->list s)))
