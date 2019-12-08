@@ -1,125 +1,163 @@
 #lang racket
 
-;; ## --- Day 5: Sunny with a Chance of Asteroids ---
-;;
-;; You're starting to sweat as the ship makes its way toward Mercury.  The
-;; Elves suggest that you get the air conditioner working by upgrading your
-;; ship computer to support the Thermal Environment Supervision Terminal.
-;;
-;; The Thermal Environment Supervision Terminal (TEST) starts by running a
-;; _diagnostic program_ (your puzzle input).  The TEST diagnostic program will
-;; run on your existing Intcode computer after a few modifications:
-;;
-;; _First_, you'll need to add _two new instructions_:
-;;
-;; * Opcode `3` takes a single integer as _input_ and saves it to the position
-;;   given by its only parameter. For example, the instruction `3,50` would take
-;;   an input value and store it at address `50`.
-;; * Opcode `4` _outputs_ the value of its only parameter. For example, the
-;;   instruction `4,50` would output the value at address `50`.
-;;
-;; Programs that use these instructions will come with documentation that
-;; explains what should be connected to the input and output. The program
-;; `3,0,4,0,99` outputs whatever it gets as input, then halts.
-;;
-;; _Second_, you'll need to add support for _parameter modes_:
-;;
-;; Each parameter of an instruction is handled based on its parameter mode.
-;; Right now, your ship computer already understands parameter mode `0`,
-;; _position mode_, which causes the parameter to be interpreted as a
-;; _position_ - if the parameter is `50`, its value is _the value stored at
-;; address `50` in memory_. Until now, all parameters have been in position
-;; mode.
-;;
-;; Now, your ship computer will also need to handle parameters in mode `1`,
-;; _immediate mode_. In immediate mode, a parameter is interpreted as a
-;; _value_ - if the parameter is `50`, its value is simply _`50`_.
-;;
-;; Parameter modes are stored in the same value as the instruction's opcode.
-;; The opcode is a two-digit number based only on the ones and tens digit of
-;; the value, that is, the opcode is the rightmost two digits of the first
-;; value in an instruction. Parameter modes are single digits, one per
-;; parameter, read right-to-left from the opcode: the first parameter's mode
-;; is in the hundreds digit, the second parameter's mode is in the thousands
-;; digit, the third parameter's mode is in the ten-thousands digit, and so on.
-;; Any missing modes are `0`.
-;;
-;; For example, consider the program `1002,4,3,4,33`.
-;;
-;; The first instruction, `1002,4,3,4`, is a _multiply_ instruction - the
-;; rightmost two digits of the first value, `02`, indicate opcode `2`,
-;; multiplication.  Then, going right to left, the parameter modes are `0`
-;; (hundreds digit), `1` (thousands digit), and `0` (ten-thousands digit, not
-;; present and therefore zero):
-;;
-;; `ABCDE
-;;  1002
-;;
-;; DE - two-digit opcode,      02 == opcode 2
-;;  C - mode of 1st parameter,  0 == position mode
-;;  B - mode of 2nd parameter,  1 == immediate mode
-;;  A - mode of 3rd parameter,  0 == position mode,
-;;                                   omitted due to being a leading zero
-;; `
-;;
-;; This instruction multiplies its first two parameters.  The first parameter,
-;; `4` in position mode, works like it did before - its value is the value
-;; stored at address `4` (`33`). The second parameter, `3` in immediate mode,
-;; simply has value `3`. The result of this operation, `33 * 3 = 99`, is
-;; written according to the third parameter, `4` in position mode, which also
-;; works like it did before - `99` is written to address `4`.
-;;
-;; Parameters that an instruction writes to will _never be in immediate mode_.
-;;
-;; _Finally_, some notes:
-;;
-;; * It is important to remember that the instruction pointer should increase by
-;;   _the number of values in the instruction_ after the instruction finishes.
-;;   Because of the new instructions, this amount is no longer always `4`.
-;; * Integers can be negative: `1101,100,-1,4,0` is a valid program (find `100 +
-;;   -1`, store the result in position `4`).
-;;
-;; The TEST diagnostic program will start by requesting from the user the ID
-;; of the system to test by running an _input_ instruction - provide it `1`,
-;; the ID for the ship's air conditioner unit.
-;;
-;; It will then perform a series of diagnostic tests confirming that various
-;; parts of the Intcode computer, like parameter modes, function correctly.
-;; For each test, it will run an _output_ instruction indicating how far the
-;; result of the test was from the expected value, where `0` means the test
-;; was successful.  Non-zero outputs mean that a function is not working
-;; correctly; check the instructions that were run before the output
-;; instruction to see which one failed.
-;;
-;; Finally, the program will output a _diagnostic code_ and immediately halt.
-;; This final output isn't an error; an output followed immediately by a halt
-;; means the program finished.  If all outputs were zero except the diagnostic
-;; code, the diagnostic program ran successfully.
-;;
-;; After providing `1` to the only input instruction and passing all the
-;; tests, _what diagnostic code does the program produce?_
-
+(require syntax/parse/define)
 (require "../2016/myutils.rkt")
+
+;; TODO: (require "int-code.rkt")
 
 (module+ test
   (require rackunit))
 
-(define (problem-05a input)
-  #f)
+(define (mem-set mem pos v)
+  (define v2 (vector-copy mem))         ; HACK: remove this
+  (dbg "mem-set ~a = ~a~n" pos v)
+  (vector-set! v2 pos v)
+  v2)
+
+(define (mem-get mem pos)
+  (if (and (number? pos) (>= pos 0) (< pos (vector-length mem)))
+      (begin
+        (dbg "mem-get ~a = ~a~n" pos (vector-ref mem pos))
+        (vector-ref mem pos))
+      ;; (error 'mem-get "out of bounds ~a in ~a" pos mem)
+      #f
+      ))
+
+(define mem-len vector-length)
+
+(define (mem-peek mem pos)
+  (define max (mem-len mem))
+
+  (if (< pos max)
+      (if (< pos (- max 5))
+          (vector-take (vector-drop mem pos) 5)
+          (vector-drop mem pos))
+      (error 'mem-peek "Out of bounds entirely ~a < ~a" pos max)))
+
+(define (b->i b) (if b 1 0))
+
+;; (define-simple-macro (dbg fmt arg ...) (printf fmt arg ...))
+(define-simple-macro (dbg fmt arg ...) (void))
+
+(define (execute mem input)
+  (define output null)
+  (define max (mem-len mem))
+
+  (for/fold ([mem mem]
+             [pos 0]
+             [done #f])
+            ([steps (in-naturals)])
+    #:break done
+    (dbg "M ~a/~a ~a...~n" pos max (mem-peek mem pos))
+    (let* ([inst (~0n (mem-get mem pos) 5)]
+           [mc (string->number (substring inst 0 1))]
+           [mb (string->number (substring inst 1 2))]
+           [ma (string->number (substring inst 2 3))]
+           [op (string->number (substring inst 3 5))]
+           [raw1 (mem-get mem (+ 1 pos))]
+           [raw2 (mem-get mem (+ 2 pos))]
+           [raw3 (mem-get mem (+ 3 pos))]
+           [r1 (if (zero? ma) (mem-get mem raw1) raw1)]
+           [r2 (if (zero? mb) (mem-get mem raw2) raw2)]
+           [r3 (if (zero? mc) (mem-get mem raw3) raw3)])
+      (dbg "D inst:~a r1:~a r2:~a r3:~a~n" inst r1 r2 r3)
+      (case op
+        [(99)
+         ;; =>
+         (dbg "HALT ~a~n~n" (reverse output))
+         (values                        ; HALT
+          mem
+          pos
+          (not done))]
+
+        [(01)                           ; ADD
+         ;; =>
+         (dbg "ADD ~a + ~a => ~a~n" r1 r2 raw3)
+         (values (mem-set mem raw3 (+ r1 r2))
+                 (+ 4 pos)
+                 done)]
+
+        [(02)                           ; MUL
+         ;; =>
+         (dbg "MUL ~a * ~a => ~a~n" r1 r2 raw3)
+         (values (mem-set mem raw3 (* r1 r2))
+                 (+ 4 pos)
+                 done)]
+
+        [(03)                           ; READ
+         ;; =>
+         (define v (car input))
+         (set! input (cdr input))
+         (dbg "READ: ~a => ~a~n" v raw1)
+         (values (mem-set mem raw1 v)
+                 (+ 2 pos)
+                 done)]
+
+        [(04)                           ; WRITE
+         ;; =>
+         (define v (mem-get mem raw1))
+         (set! output (cons v output))
+         (dbg "WRITE ~a => ~a~n" v output)
+         (values mem
+                 (+ 2 pos)
+                 done)]
+
+        [(05)                           ; JTRUE
+         ;; =>
+         (dbg "JTRUE ~a ~a~n" r1 r2)
+         (values mem
+                 (if (zero? r1) (+ 3 pos) r2)
+                 done)]
+
+        [(06)                           ; JFALSE
+         ;; =>
+         (dbg "JFALSE ~a ~a~n" r1 r2)
+         (values mem
+                 (if (zero? r1) r2 (+ 3 pos))
+                 done)]
+
+        [(07)                           ; LT
+         ;; =>
+         (dbg "LT ~a < ~a => ~a~n" r1 r2 r3)
+         (values (mem-set mem raw3 (b->i (< r1 r2)))
+                 (+ 4 pos)
+                 done)]
+
+        [(08)                           ; EQ
+         ;; =>
+         (dbg "EQ ~a = ~a => ~a~n" r1 r2 r3)
+         (values (mem-set mem raw3 (b->i (eq? r1 r2)))
+                 (+ 4 pos)
+                 done)]
+
+        [else (error 'execute "WTF?!? ~a ~a ~a ~a in ~a" mc mb ma op inst)])))
+
+  (reverse output))
 
 (module+ test
-  (check-equal? (problem-05a "123") 3))
+  (define-simple-check (check-int-code input program output)
+    (check-equal? (execute program input)
+                  output))
 
-(define (problem-05b input)
-  #f)
+  (check-int-code '(8) '#(3 9 8 9 10 9 4 9 99 -1 8) '(1))
+  (check-int-code '(7) '#(3 9 8 9 10 9 4 9 99 -1 8) '(0))
+  (check-int-code '(8) '#(3 9 7 9 10 9 4 9 99 -1 8) '(0))
+  (check-int-code '(7) '#(3 9 7 9 10 9 4 9 99 -1 8) '(1))
+  (check-int-code '(8) '#(3 3 1108 -1 8 3 4 3 99)   '(1))
+  (check-int-code '(7) '#(3 3 1108 -1 8 3 4 3 99)   '(0))
+  (check-int-code '(8) '#(3 3 1107 -1 8 3 4 3 99)   '(0))
+  (check-int-code '(7) '#(3 3 1107 -1 8 3 4 3 99)   '(1)))
 
-(module+ test
-  (check-equal? (problem-05b "123") 6))
+(define (problem-05a program)
+  (execute program '(1)))
+
+(define (problem-05b program)
+  (execute program '(5)))
 
 (module+ test
   (displayln 'done))
 
 (module+ main
-  (define input (parse-file (data-file 05)))
-  (problem-05a input)
-  (problem-05b input))
+  (define input (list->vector (parse-numbers (data-file 05) ",")))
+  (last (problem-05a input))
+  (last (problem-05b input)))
