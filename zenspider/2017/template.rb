@@ -17,10 +17,14 @@ if ARGV.empty? then
 
   class TestNN < Minitest::Test
     def test_a
+      obj = ProblemNNa.new.run
+
       flunk
     end
 
     def test_b
+      obj = ProblemNNb.new.run
+
       skip
     end
   end
