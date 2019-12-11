@@ -4,6 +4,9 @@
 
 (provide (all-defined-out))
 
+(define (mem-parse input)
+  (list->vector (parse-numbers input ",")))
+
 (define (mem-set mem pos v)
   (vector-set! mem pos v)
   mem)

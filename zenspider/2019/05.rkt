@@ -30,6 +30,6 @@
   (displayln 'done))
 
 (module+ main
-  (define input (list->vector (parse-numbers (data-file 05) ",")))
+  (define input (mem-parse (data-file 05)))
   (last (problem-05a input))
   (last (problem-05b input)))
