@@ -44,10 +44,17 @@ directory "input"
   end
 
   desc "Run #{day_s} ruby"
+  task "run:#{day_s}" => ["run:#{day_s}:rb", "run:#{day_s}:rkt"]
+
+  desc "Run #{day_s} ruby"
   task "run:#{day_s}:rb" do
-    sh "ruby ./#{day_s}.rb input/#{day_s}.txt"
+    sh "time ruby ./#{day_s}.rb input/#{day_s}.txt"
   end
 
+  desc "Run #{day_s} racket"
+  task "run:#{day_s}:rkt" do
+    sh "time racket #{day_s}.rkt"
+  end
 
   desc "Run #{day_s} ruby"
   task "test:#{day_s}:rb" do
