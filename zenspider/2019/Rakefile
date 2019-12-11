@@ -44,6 +44,12 @@ directory "input"
   end
 
   desc "Run #{day_s} ruby"
+  task "run:#{day_s}:rb" do
+    sh "ruby ./#{day_s}.rb input/#{day_s}.txt"
+  end
+
+
+  desc "Run #{day_s} ruby"
   task "test:#{day_s}:rb" do
     sh "time minitest #{day_s}.rb"
   end
