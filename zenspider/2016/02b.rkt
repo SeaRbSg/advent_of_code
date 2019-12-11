@@ -5,7 +5,7 @@
          racket/list
          racket/match
          racket/string
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define (cell n)                        ; builds '#(n u d l r), points to self
   (define v (make-vector 5))

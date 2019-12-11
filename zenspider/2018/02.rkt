@@ -1,6 +1,6 @@
 #lang racket
 
-(require "./myutils.rkt")
+(require "../myutils.rkt")
 
 (define s1 '("abcdef" "bababc" "abbcde" "abcccd" "aabcdd" "abcdee" "ababab"))
 (define s2 '("abcde" "fghij" "klmno" "pqrst" "fguij" "axcye" "wvxyz"))

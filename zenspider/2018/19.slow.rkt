@@ -1,6 +1,6 @@
 #lang racket
 
-(require "myutils.rkt")
+(require "../myutils.rkt")
 
 (struct reg  (r0 r1 r2 r3 r4 r5 pc) #:transparent)
 (struct inst (op a b c) #:transparent)

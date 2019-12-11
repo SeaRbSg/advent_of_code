@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require racket/match
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define (triangle? l)
   (match-define (list a b c) (sort l <))

@@ -2,7 +2,7 @@
 
 (require racket/list
          racket/string
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define (parse-room-name s)
   (define-regexp (enc (app string->number sec) chk) #rx"([a-z-]+)([0-9]+)\\[([a-z]+)\\]" s)

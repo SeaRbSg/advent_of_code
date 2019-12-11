@@ -2,7 +2,7 @@
 
 (require racket/sequence
          racket/string
-         "../2016/myutils.rkt")
+         "../myutils.rkt")
 
 (module+ test
   (require rackunit))

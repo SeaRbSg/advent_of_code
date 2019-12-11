@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../2016/myutils.rkt")
+(require "../myutils.rkt")
 
 (struct cpu (pc count a b c d e f g h) #:transparent #:mutable)
 

@@ -3,7 +3,7 @@
 (require racket/list
          racket/match
          racket/string
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define directions (parse-file (data-file 1)))
 

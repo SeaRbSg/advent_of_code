@@ -1,6 +1,6 @@
 #lang racket
 
-(require "myutils.rkt")
+(require "../myutils.rkt")
 
 (struct register (pc a b c d) #:mutable #:transparent)
 

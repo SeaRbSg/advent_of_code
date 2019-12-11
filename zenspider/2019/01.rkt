@@ -37,7 +37,7 @@
 ;; _What is the sum of the fuel requirements_ for all of the modules on your
 ;; spacecraft?
 
-(require "../2016/myutils.rkt")
+(require "../myutils.rkt")
 
 (module+ test
   (require rackunit))

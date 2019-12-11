@@ -2,7 +2,7 @@
 
 (require racket/list
          racket/match
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define (parse ip)                      ; -> hypers supers
   (partition (lambda (s) (eq? (string-ref s 0) #\[))

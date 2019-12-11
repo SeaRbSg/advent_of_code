@@ -3,7 +3,7 @@
 (require (for-syntax racket/base)
          racket/function
          racket/match
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (struct register (pc a b c d) #:mutable #:transparent)
 

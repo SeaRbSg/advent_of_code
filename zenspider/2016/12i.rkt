@@ -95,7 +95,7 @@
 (module* test racket        ; avoid module+, causes circularity issues
   (require rackunit)
   (require (prefix-in my/ (submod ".."))) ; explicity require w/ prefix
-  (require (only-in "myutils.rkt" data-file))
+  (require (only-in "../myutils.rkt" data-file))
 
   (define (run port [initial #f])
     (when (path? port)

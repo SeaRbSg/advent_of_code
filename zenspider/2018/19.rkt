@@ -4,7 +4,7 @@
          racket/string
          racket/list
          racket/function
-         "myutils.rkt")
+         "../myutils.rkt")
 
 ;; switch setters to static compilation = ~2-4 ms    (~0.75s -> ~0.72s)
 ;; mutable structs                      = ~150-200ms (~0.70s -> ~0.55s)

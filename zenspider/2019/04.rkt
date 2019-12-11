@@ -2,7 +2,7 @@
 
 (require racket/function
          racket/list
-         "../2016/myutils.rkt")
+         "../myutils.rkt")
 
 (module+ test
   (require rackunit))

@@ -2,7 +2,7 @@
 
 ;; DESCRIPTION
 
-(require "../2016/myutils.rkt")
+(require "../myutils.rkt")
 
 (module+ test
   (require rackunit))

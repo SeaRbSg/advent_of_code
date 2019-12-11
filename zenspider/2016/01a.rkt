@@ -2,7 +2,7 @@
 
 (require racket/match
          racket/string
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define (parse in)
   (parse-words in ", "))

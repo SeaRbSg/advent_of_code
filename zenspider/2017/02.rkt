@@ -2,7 +2,7 @@
 
 (require math/number-theory
          math/base
-         "../2016/myutils.rkt")
+         "../myutils.rkt")
 
 (module+ test
   (require rackunit))

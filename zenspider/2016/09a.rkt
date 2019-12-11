@@ -2,7 +2,7 @@
 
 (require racket/list
          racket/string
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define (decompress s)
   (define-regexp (b n m a) #px"([^(]*)(?:\\((\\d+)x(\\d+)\\))?(.*)" s)

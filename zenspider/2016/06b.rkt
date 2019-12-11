@@ -2,7 +2,7 @@
 
 (require racket/file
          racket/list
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (define alphabet (string->list "abcdefghijklmnopqrstuvwxyz"))
 

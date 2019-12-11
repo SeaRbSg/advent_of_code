@@ -1,6 +1,6 @@
 #lang racket
 
-(require "myutils.rkt")
+(require "../myutils.rkt")
 
 (define-match-expander n! (syntax-rules () [(_ v) (app string->number v)]))
 (define-match-expander s! (syntax-rules () [(_ v) (app string->symbol v)]))

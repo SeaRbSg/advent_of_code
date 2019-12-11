@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "./myutils.rkt")
+(require "../myutils.rkt")
 
 (define nums (time (parse-numbers (data-file 1))))
 

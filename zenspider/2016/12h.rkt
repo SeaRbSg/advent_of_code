@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require racket/match
-         "myutils.rkt")
+         "../myutils.rkt")
 
 (struct register (pc a b c d) #:mutable #:transparent)
 

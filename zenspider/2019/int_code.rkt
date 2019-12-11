@@ -1,6 +1,6 @@
 #lang racket
 
-(require "../2016/myutils.rkt")
+(require "../myutils.rkt")
 
 (provide (all-defined-out))
 
