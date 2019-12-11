@@ -1,97 +1,73 @@
 #lang racket
 
-;; ## --- Day 6: Universal Orbit Map ---
-;;
-;; You've landed at the Universal Orbit Map facility on Mercury.  Because
-;; navigation in space often involves transferring between orbits, the orbit
-;; maps here are useful for finding efficient routes between, for example, you
-;; and Santa. You download a map of the local orbits (your puzzle input).
-;;
-;; Except for the universal Center of Mass (`COM`), every object in space is
-;; in orbit around _exactly one other object_ ((What do you mean, Kerbal Space
-;; Program doesn't have accurate orbital physics?)).  An orbit looks roughly
-;; like this:
-;;
-;; `                  \
-;;                    \
-;;                     |
-;;                     |
-;; AAA--&gt; o            o &lt;--BBB
-;;                     |
-;;                     |
-;;                    /
-;;                   /
-;; `
-;;
-;; In this diagram, the object `BBB` is in orbit around `AAA`. The path that
-;; `BBB` takes around `AAA` (drawn with lines) is only partly shown. In the
-;; map data, this orbital relationship is written `AAA)BBB`, which means
-;; &quot;`BBB` is in orbit around `AAA`&quot;.
-;;
-;; Before you use your map data to plot a course, you need to make sure it
-;; wasn't corrupted during the download.  To verify maps, the Universal Orbit
-;; Map facility uses _orbit count checksums_ - the total number of _direct
-;; orbits_ (like the one shown above) and _indirect orbits_.
-;;
-;; Whenever `A` orbits `B` and `B` orbits `C`, then `A` _indirectly orbits_
-;; `C`.  This chain can be any number of objects long: if `A` orbits `B`, `B`
-;; orbits `C`, and `C` orbits `D`, then `A` indirectly orbits `D`.
-;;
-;; For example, suppose you have the following map:
-;;
-;; `COM)B
-;; B)C
-;; C)D
-;; D)E
-;; E)F
-;; B)G
-;; G)H
-;; D)I
-;; E)J
-;; J)K
-;; K)L
-;; `
-;;
-;; Visually, the above map of orbits looks like this:
-;;
-;; `        G - H       J - K - L
-;;        /           /
-;; COM - B - C - D - E - F
-;;                \
-;;                 I
-;; `
-;;
-;; In this visual representation, when two objects are connected by a line,
-;; the one on the right directly orbits the one on the left.
-;;
-;; Here, we can count the total number of orbits as follows:
-;;
-;; * `D` directly orbits `C` and indirectly orbits `B` and `COM`, a total of `3`
-;;   orbits.
-;; * `L` directly orbits `K` and indirectly orbits `J`, `E`, `D`, `C`, `B`, and
-;;   `COM`, a total of `7` orbits.
-;; * `COM` orbits nothing.
-;;
-;; The total number of direct and indirect orbits in this example is `_42_`.
-;;
-;; _What is the total number of direct and indirect orbits_ in your map data?
-
 (require "../2016/myutils.rkt")
 
 (module+ test
   (require rackunit))
 
+(define (parse input)
+  (for/hash ([pair (parse-lines-of-atoms input ")")])
+    (values (second pair) (first pair))))
+
+(define (count orbits name)
+  (define sub (hash-ref orbits name #f))
+  (if sub (add1 (count orbits sub)) 0))
+
 (define (problem-06a input)
-  #f)
+  (define orbits (parse input))
+  (for/sum ([name (in-hash-keys orbits)])
+    (count orbits name)))
+
+(define (path orbits name)
+  (define sub (hash-ref orbits name #f))
+  (if sub
+      (cons sub (path orbits sub))
+      empty))
+
+(define (count-path orbits from to)
+  (define a (path orbits from))
+  (define b (path orbits to))
+  (define c (last (set-intersect a b)))  ; last might be wrong
+
+  (define d (count orbits from))
+  (define e (count orbits to))
+  (define f (- (count orbits c)))
+
+  (+ d e f f))
 
 (module+ test
-  (check-equal? (problem-06a "123") 3))
+  (define input "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L")
+
+  (define parsed (parse input))
+
+  (check-equal? parsed
+                '#hash((B . COM)
+                       (C . B)
+                       (D . C)
+                       (E . D)
+                       (F . E)
+                       (G . B)
+                       (H . G)
+                       (I . D)
+                       (J . E)
+                       (K . J)
+                       (L . K)))
+
+  (check-equal? (count parsed 'L)
+                7)
+
+  (check-equal? (problem-06a input)
+                42))
 
 (define (problem-06b input)
-  #f)
+  (- (count-path (parse input) 'YOU 'SAN) 2))
 
 (module+ test
-  (check-equal? (problem-06b "123") 6))
+  (check-equal? (path parsed 'L)
+                '(K J E D C B COM))
+
+  (check-equal? (count-path parsed 'K 'I)
+                4))
 
 (module+ test
   (displayln 'done))

@@ -121,7 +121,8 @@
         (lambda (a b) (< (first b) (first a)))))
 
 (define (list-intersect . xss)
-  (set->list (apply set-intersect (map list->set xss))))
+  ;; (set->list (apply set-intersect (map list->set xss)))
+  (apply set-intersect xss))
 
 (define (->port in)
   (cond [(input-port? in) in]
